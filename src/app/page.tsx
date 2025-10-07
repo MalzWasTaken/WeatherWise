@@ -1,5 +1,5 @@
 "use client";
-
+import  { useRouter } from "next/navigation"
 import { useState } from "react";
 
 export default function Home() {
@@ -7,6 +7,15 @@ export default function Home() {
   const [weather, setWeather] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const router = useRouter();
+
+  const handleLogin = () => {
+      router.push("./pages/Login")
+  }
+
+  const handleRegister = () => {
+    router.push("./pages/Register")
+  }
 
   // Placeholder function for fetching weather (API to be added later)
   const getWeather = () => {
@@ -53,6 +62,9 @@ export default function Home() {
           <p className="text-4xl">{weather.icon}</p>
         </div>
       )}
+
+      <button onClick={handleLogin} className=" bg-red-500 hover:bg-red-300 text-white font-bold py-2 px-6 rounded mb-6"> Login </button>
+      <button onClick={handleRegister} className= " bg-yellow-500 hover:bg-yellow-300 text-black font-bold py-2 px-6 rounded mb-6"> Register </button>
     </div>
   );
 }
