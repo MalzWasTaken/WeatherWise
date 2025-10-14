@@ -15,7 +15,7 @@ import {
 
 export function SearchBar(){
 
-    const [results,setResults] = useState(2);
+    const [results,setResults] = useState(1);
 
     
 
