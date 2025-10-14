@@ -1,5 +1,5 @@
 "use client";
-import  { useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useState } from "react";
 
 export default function Home() {
@@ -9,18 +9,16 @@ export default function Home() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  //navigation handlers for testing
-
-  const handleHome = () => {
-    router.push("./pages/home")
-  }
-
   const handleLogin = () => {
       router.push("./pages/Login")
   }
 
   const handleRegister = () => {
     router.push("./pages/Register")
+  }
+
+  const handleDashboard = () => {
+    router.push("./pages/home")
   }
 
   // Placeholder function for fetching weather (API to be added later)
@@ -69,9 +67,9 @@ export default function Home() {
         </div>
       )}
 
-      <button onClick={handleHome} className=" bg-green-300 hover:bg-green-500 text-white font-bold py-2 px-6 rounded mb-6 mt-6"> Home </button>
-      <button onClick={handleLogin} className=" bg-red-300 hover:bg-red-500 text-white font-bold py-2 px-6 rounded mb-6"> Login </button>
-      <button onClick={handleRegister} className= " bg-orange-200 hover:bg-orange-500 text-white font-bold py-2 px-6 rounded mb-6"> Register </button>
+      <button onClick={handleLogin} className=" bg-red-500 hover:bg-red-300 text-white font-bold py-2 px-6 rounded mb-6"> Login </button>
+      <button onClick={handleRegister} className= " bg-yellow-500 hover:bg-yellow-300 text-black font-bold py-2 px-6 rounded mb-6"> Register </button>
+      <button onClick = {handleDashboard} className = "bg-green-500 text-black font-bold py-2 px-6 rounded mb-6"> Dashboard</button>
     </div>
   );
 }
