@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 
+
+
 const HomePage = () => {
 
   const [weather, setWeather] = useState("rain");
@@ -15,6 +17,7 @@ const HomePage = () => {
   const handleBack = () => {
     router.push("/")
   }
+  const 
 
  
   //background change based on weather

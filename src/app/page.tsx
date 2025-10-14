@@ -1,6 +1,8 @@
 "use client";
 import { useRouter } from "next/navigation"
 import { useState, useRef } from "react";
+import useSound from "use-sound";
+
 
 export default function Home() {
   // State for weather data
@@ -11,6 +13,10 @@ export default function Home() {
   const [imageOpacity, setImageOpacity] = useState(0);
   const fadeTimeout = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
+  
+
+  const audio =  new Audio('/sounds/gaddamn.mp3');
+
 
   const handleLogin = () => {
     router.push("./pages/Login");
@@ -25,6 +31,7 @@ export default function Home() {
   };
 
   const handleFlashbang = () => {
+    audio.play();
     setFlashStage('white');
     setImageOpacity(0);
     // White flash for 400ms
@@ -37,7 +44,7 @@ export default function Home() {
         setImageOpacity(0);
         setTimeout(() => setFlashStage(null), 700); // match fade out duration
       }, 1400);
-    }, 400);
+    }, 2000);
   };
 
   // Placeholder function for fetching weather (API to be added later)
