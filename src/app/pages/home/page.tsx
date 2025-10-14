@@ -41,16 +41,19 @@ const HomePage = () => {
   return (
     <div className={`min-h-screen flex flex-col items-center  text-gray-800 transition-all duration-700 bg-gradient-to-b p-4 ${getBackground(weather)}`}>
       <TopBar />
-      {/* Rain overlay */}
-      {weather.toLowerCase() === "rain" && (
-        <div className="h-full w-full flex items-center justify-center">
-          <DotLottieReact
-            src="https://lottie.host/8f241ec2-b9a7-48d4-999a-0964fe33eac5/n206S1yhSM.lottie"
-          loop 
+
+
+    {/* Thunderstorm overlay */}
+    {weather.toLowerCase() === "thunderstorm" && (
+      <div className="h-full w-full flex items-center justify-center">
+        <DotLottieReact
+          src="https://lottie.host/306915d2-f885-4837-98a9-fca1f128412d/xxX4lakUQb.lottie"
+          loop
           autoplay
-          />
-        </div>
-      ) }
+        />
+      </div>
+    )}
+    
       <button className="bg-green-300 hover:bg-green-500 text-white font-bold py-2 px-6 rounded mb-6 mt-6" onClick={handleBack}>Back to main page</button>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation"
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export default function Home() {
   // State for weather data
@@ -8,6 +8,8 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [flashStage, setFlashStage] = useState<null | 'white' | 'image' | 'fadeout'>(null);
+  const [imageOpacity, setImageOpacity] = useState(0);
+  const fadeTimeout = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
 
   const handleLogin = () => {
@@ -24,9 +26,18 @@ export default function Home() {
 
   const handleFlashbang = () => {
     setFlashStage('white');
-    setTimeout(() => setFlashStage('image'), 400); // white flash for 400ms
-    setTimeout(() => setFlashStage('fadeout'), 1800); // image for 1.4s
-    setTimeout(() => setFlashStage(null), 2500); // fade out for 0.7s
+    setImageOpacity(0);
+    // White flash for 400ms
+    setTimeout(() => {
+      setFlashStage('image');
+      // Start fade in
+      setTimeout(() => setImageOpacity(1), 50); // slight delay to trigger transition
+      // Stay fully visible for 1.2s, then fade out
+      fadeTimeout.current = setTimeout(() => {
+        setImageOpacity(0);
+        setTimeout(() => setFlashStage(null), 700); // match fade out duration
+      }, 1400);
+    }, 400);
   };
 
   // Placeholder function for fetching weather (API to be added later)
@@ -50,19 +61,32 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-blue-50 flex flex-col items-center justify-center p-8 relative overflow-hidden">
       {/* Flashbang/image overlay */}
-      {flashStage && (
+      {flashStage === 'white' && (
+        <div className="fixed inset-0 z-50 bg-white pointer-events-none transition-opacity duration-300" style={{ opacity: 1 }} />
+      )}
+      {flashStage === 'image' && (
         <div
-          className={`fixed inset-0 z-50 flex items-center justify-center pointer-events-none transition-opacity duration-700 ${flashStage === 'white' ? 'bg-white opacity-100' : ''}`}
+          className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center"
           style={{
-            background: flashStage === 'image' || flashStage === 'fadeout'
-              ? `url('https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/c9a27e0a-52f7-4cec-a932-b6246308a58e/dfrux2e-65634c86-4516-480c-a9ec-d669aa794fd1.jpg/v1/fit/w_828,h_1018,q_70,strp/staring_donkey_by_j0j0999ozman_dfrux2e-414w-2x.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTU4NiIsInBhdGgiOiIvZi9jOWEyN2UwYS01MmY3LTRjZWMtYTkzMi1iNjI0NjMwOGE1OGUvZGZydXgyZS02NTYzNGM4Ni00NTE2LTQ4MGMtYTllYy1kNjY5YWE3OTRmZDEuanBnIiwid2lkdGgiOiI8PTEyOTAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.rsif7fpzkLTpz9PbA6EcSihOhZszBw00GkU1087iMRw') center center / cover no-repeat`
-              : flashStage === 'white'
-                ? undefined
-                : undefined,
-            opacity: flashStage === 'fadeout' ? 0 : 1,
-            transition: 'background 0.7s, opacity 0.7s',
+            background: `black`,
+            transition: 'background 0.7s',
           }}
-        />
+        >
+          <img
+            src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/c9a27e0a-52f7-4cec-a932-b6246308a58e/dfrux2e-65634c86-4516-480c-a9ec-d669aa794fd1.jpg/v1/fit/w_828,h_1018,q_70,strp/staring_donkey_by_j0j0999ozman_dfrux2e-414w-2x.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTU4NiIsInBhdGgiOiIvZi9jOWEyN2UwYS01MmY3LTRjZWMtYTkzMi1iNjI0NjMwOGE1OGUvZGZydXgyZS02NTYzNGM4Ni00NTE2LTQ4MGMtYTllYy1kNjY5YWE3OTRmZDEuanBnIiwid2lkdGgiOiI8PTEyOTAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.rsif7fpzkLTpz9PbA6EcSihOhZszBw00GkU1087iMRw"
+            alt="Staring Donkey"
+            style={{
+              maxWidth: '100vw',
+              maxHeight: '100vh',
+              width: 'auto',
+              height: 'auto',
+              opacity: imageOpacity,
+              transition: 'opacity 0.7s',
+              borderRadius: 0,
+              boxShadow: 'none',
+            }}
+          />
+        </div>
       )}
       <h1 className="text-5xl font-bold text-gray-900 mb-6 text-center">
         WeatherWise
@@ -94,9 +118,6 @@ export default function Home() {
       <button onClick={handleRegister} className= " bg-yellow-500 hover:bg-yellow-300 text-black font-bold py-2 px-6 rounded mb-6"> Register </button>
       <button onClick={handleDashboard} className = "bg-green-500 text-black font-bold py-2 px-6 rounded mb-6"> Dashboard</button>
       <button onClick={handleFlashbang} className = "bg-black text-white font-bold py-2 px-6 rounded mb-6">Local Girl in your neighborhood</button>
-      <style jsx global>{`
-        /* No extra keyframes needed, handled by React state and transition classes */
-      `}</style>
     </div>
   );
 }
