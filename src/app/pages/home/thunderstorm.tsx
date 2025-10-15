@@ -1,5 +1,0 @@
-const Thunderstorm = () => {
-    return(
-
-    )
-}

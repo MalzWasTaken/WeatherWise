@@ -15,7 +15,7 @@ export default function Home() {
   const router = useRouter();
   
 
-  const audio =  new Audio('/sounds/gaddamn.mp3');
+  const audio = new Audio('/sounds/gaddamn.mp3');
 
 
   const handleLogin = () => {
@@ -123,8 +123,8 @@ export default function Home() {
 
       <button onClick={handleLogin} className=" bg-red-500 hover:bg-red-300 text-white font-bold py-2 px-6 rounded mb-6"> Login </button>
       <button onClick={handleRegister} className= " bg-yellow-500 hover:bg-yellow-300 text-black font-bold py-2 px-6 rounded mb-6"> Register </button>
-      <button onClick={handleDashboard} className = "bg-green-500 text-black font-bold py-2 px-6 rounded mb-6"> Dashboard</button>
-      <button onClick={handleFlashbang} className = "bg-black text-white font-bold py-2 px-6 rounded mb-6">Local Girl in your neighborhood</button>
+      <button onClick={handleDashboard} className = "bg-green-500 hover:opacity-75 text-black font-bold py-2 px-6 rounded mb-6"> Dashboard</button>
+      <button onClick={handleFlashbang} className = "bg-black hover:opacity-75 text-white font-bold py-2 px-6 rounded mb-6">Local Girl in your neighborhood</button>
     </div>
   );
 }

@@ -22,9 +22,9 @@ export function SearchBar(){
     return (
         <div className="w-full max-w-md gap-6">
         <InputGroup>
-            <InputGroupInput placeholder="Search City"/>
+            <InputGroupInput placeholder="Search City" color="white"/>
             <InputGroupAddon>
-                <Search/>
+                <Search color="white" textDecoration={"white"}/>
             </InputGroupAddon>
             <InputGroupAddon align="inline-end">{results} {results ===1 ? "Result" : "Results"}</InputGroupAddon>
 
