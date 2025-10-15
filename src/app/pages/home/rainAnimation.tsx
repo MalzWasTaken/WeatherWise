@@ -3,30 +3,52 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
   import React, { useEffect, useRef } from "react";
 
-export default function RainAnimation({type = "medium"}) {
+  type RainType = "drizzle" | "light" | "medium" | "downpour" | "afteshower";
+
+  interface RainAnimationProps {
+    type?: RainType;
+  }
+
+  export default function RainAnimation({type = "medium"}: RainAnimationProps) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const canvas = canvasRef.current as HTMLCanvasElement | null;
+    if (!canvas) return;
     const context = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    if (!context) return;
 
-    const canvasHeight = canvas.height;
-    const canvasWidth = canvas.width;
+    // Function to resize canvas to window size
+    const resizeCanvas = () => {
+      if (!canvas) return;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resizeCanvas();
 
-    const getRandomFloat = (min, max) => Math.random() * (max - min + 1) + min;
-    const getRandomInteger = (min, max) => Math.floor(getRandomFloat(min, max));
-    const createVector = (x, y) => ({ x, y });
+    // Listen for window resize events
+    window.addEventListener('resize', resizeCanvas);
 
-    const clearCanvas = (x, y, height, width) => {
+    let canvasHeight = canvas.height;
+    let canvasWidth = canvas.width;
+
+  const getRandomFloat = (min: number, max: number): number => Math.random() * (max - min + 1) + min;
+  const getRandomInteger = (min: number, max: number): number => Math.floor(getRandomFloat(min, max));
+  const createVector = (x: number, y: number) => ({ x, y });
+
+    const clearCanvas = (x?: number, y?: number, height?: number, width?: number) => {
+      if (!canvas || !context) return;
+      // Always get latest canvas size
+      canvasHeight = canvas.height;
+      canvasWidth = canvas.width;
       const rectHeight = height || canvasHeight;
       const rectWidth = width || canvasWidth;
       context.clearRect(x || 0, y || 0, rectWidth, rectHeight);
       context.beginPath();
     };
 
-    const circle = (x, y, radius, filled) => {
+    const circle = (x: number, y: number, radius: number, filled: boolean) => {
+      if (!context) return;
       const offset = radius / 2;
       x -= offset;
       y -= offset;
@@ -39,13 +61,13 @@ export default function RainAnimation({type = "medium"}) {
       context.closePath();
     };
 
-    const vectorAddition = (a, b) => typeof b === 'number' ? { x: a.x + b, y: a.y + b } : { x: a.x + b.x, y: a.y + b.y };
-    const vectorSubtraction = (a, b) => typeof b === 'number' ? { x: a.x - b, y: a.y - b } : { x: a.x - b.x, y: a.y - b.y };
-    const vectorMultiplication = (a, b) => typeof b === 'number' ? { x: a.x * b, y: a.y * b } : { x: a.x * b.x, y: a.y * b.y };
-    const vectorDivision = (a, b) => typeof b === 'number' ? { x: a.x / b, y: a.y / b } : { x: a.x / b.x, y: a.y / b.y };
+  const vectorAddition = (a: {x: number, y: number}, b: {x: number, y: number} | number) => typeof b === 'number' ? { x: a.x + b, y: a.y + b } : { x: a.x + b.x, y: a.y + b.y };
+  const vectorSubtraction = (a: {x: number, y: number}, b: {x: number, y: number} | number) => typeof b === 'number' ? { x: a.x - b, y: a.y - b } : { x: a.x - b.x, y: a.y - b.y };
+  const vectorMultiplication = (a: {x: number, y: number}, b: {x: number, y: number} | number) => typeof b === 'number' ? { x: a.x * b, y: a.y * b } : { x: a.x * b.x, y: a.y * b.y };
+  const vectorDivision = (a: {x: number, y: number}, b: {x: number, y: number} | number) => typeof b === 'number' ? { x: a.x / b, y: a.y / b } : { x: a.x / b.x, y: a.y / b.y };
 
-    const checkRaindropCollision = (location, radius) => {
-      let rain = { collided: false, location: null };
+    const checkRaindropCollision = (location: {x: number, y: number}, radius: number) => {
+      let rain: { collided: boolean, location: {x: number, y: number} | null } = { collided: false, location: null };
       if ((location.y - canvasHeight) >= radius) {
         rain.collided = true;
         rain.location = createVector(getRandomInteger(radius, canvasWidth - radius), radius - 10);
@@ -59,7 +81,8 @@ export default function RainAnimation({type = "medium"}) {
       return rain;
     };
 
-    const raintype = {
+
+    const raintype: Record<RainType, { count: number; speed: number }> = {
       drizzle: { count: 30, speed: 0.27 },
       light: { count: 100, speed: 0.3 },
       medium: { count: 250, speed: 0.4 },
@@ -69,10 +92,18 @@ export default function RainAnimation({type = "medium"}) {
 
     const environment = {
       wind: createVector(-0.05, 0),
-      raintype: raintype[type] || raintype.medium
+      raintype: raintype[type as RainType] || raintype.medium
     };
+
     class RainParticle {
-      constructor(x, accX, accY) {
+      damping: number;
+      location: { x: number; y: number };
+      radius: number;
+      velocity: { x: number; y: number };
+      acceleration: { x: number; y: number };
+      mass: number;
+
+      constructor(x: number, accX: number, accY: number) {
         this.damping = 0.025;
         this.location = createVector(x, canvasHeight);
         this.radius = 0.4;
@@ -81,7 +112,7 @@ export default function RainAnimation({type = "medium"}) {
         this.mass = 1;
       }
 
-      draw(particles, index) {
+      draw(particles: RainParticle[], index: number) {
         const { x, y } = this.location;
         if (this.acceleration.y >= 0.3) {
           delete particles[index];
@@ -98,7 +129,14 @@ export default function RainAnimation({type = "medium"}) {
     }
 
     class Raindrop {
-      constructor(x, y, radius, accY) {
+      location: { x: number; y: number };
+      radius: number;
+      velocity: { x: number; y: number };
+      acceleration: { x: number; y: number };
+      mass: number;
+      wind: { x: number; y: number };
+
+      constructor(x: number, y: number, radius: number, accY: number) {
         this.location = createVector(x, y);
         this.radius = radius;
         this.velocity = createVector(0, 0);
@@ -120,26 +158,31 @@ export default function RainAnimation({type = "medium"}) {
         this.location = vectorAddition(this.location, this.velocity);
       }
 
-      relive(rain) {
+      relive(rain: { location: { x: number; y: number } }) {
         const { location } = rain;
         this.location = createVector(location.x, location.y);
         this.velocity = createVector(0, 0);
       }
     }
 
-    const particleX = [-0.12, 0.06, 0, 0.06, 0.12];
-    const getParticleX = () => particleX[Math.floor(Math.random() * particleX.length)];
+  const particleX = [-0.12, 0.06, 0, 0.06, 0.12];
+  const getParticleX = (): number => particleX[Math.floor(Math.random() * particleX.length)];
 
-    let raindrop = [];
-    let particles = [];
+  let raindrop: Raindrop[] = [];
+  const particles: RainParticle[] = [];
     const raindropCount = environment.raintype.count;
 
-    for (let i = 0; i < raindropCount; i++) {
-      let x = getRandomInteger(2, canvasWidth - 2);
-      let y = getRandomInteger(-2000, 0);
-      let accY = environment.raintype.speed;
-      raindrop[i] = new Raindrop(x, y, 1.3, accY);
-    }
+    const initRaindrops = () => {
+      if (!canvas) return;
+      raindrop = [];
+      for (let i = 0; i < raindropCount; i++) {
+        const x = getRandomInteger(2, canvas.width - 2);
+        const y = getRandomInteger(-2000, 0);
+        const accY = environment.raintype.speed;
+        raindrop[i] = new Raindrop(x, y, 1.3, accY);
+      }
+    };
+    initRaindrops();
 
     const setup = () => {
       for (let i = 0; i < raindropCount; i++) {
@@ -151,15 +194,15 @@ export default function RainAnimation({type = "medium"}) {
       clearCanvas();
 
       for (let i = 0; i < raindropCount; i++) {
-        let { location, radius, velocity } = raindrop[i];
-        let rain = checkRaindropCollision(location, radius);
-        if (rain.collided) {
-          let particle1 = new RainParticle(location.x, getParticleX(), velocity.y);
+        const { location, radius, velocity } = raindrop[i];
+        const rain = checkRaindropCollision(location, radius);
+        if (rain.collided && rain.location) {
+          const particle1 = new RainParticle(location.x, getParticleX(), velocity.y);
           particles.push(particle1);
-          let particle4 = new RainParticle(location.x, getParticleX(), velocity.y);
+          const particle4 = new RainParticle(location.x, getParticleX(), velocity.y);
           particles.push(particle4);
 
-          raindrop[i].relive(rain);
+          raindrop[i].relive({ location: rain.location });
         }
         raindrop[i].fall();
         raindrop[i].draw();
@@ -174,6 +217,19 @@ export default function RainAnimation({type = "medium"}) {
 
     setup();
     requestAnimationFrame(animate);
+
+    // Re-initialize raindrops on resize
+    const handleResize = () => {
+      resizeCanvas();
+      initRaindrops();
+    };
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('resize', handleResize);
+    };
   }, [type]);
 
   return (
