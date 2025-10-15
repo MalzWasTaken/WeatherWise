@@ -3,7 +3,7 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
   import React, { useEffect, useRef } from "react";
 
-export default function RainAnimation() {
+export default function RainAnimation({type = "medium"}) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -69,9 +69,8 @@ export default function RainAnimation() {
 
     const environment = {
       wind: createVector(-0.05, 0),
-      raintype: raintype.medium
+      raintype: raintype[type] || raintype.medium
     };
-
     class RainParticle {
       constructor(x, accX, accY) {
         this.damping = 0.025;
@@ -175,7 +174,7 @@ export default function RainAnimation() {
 
     setup();
     requestAnimationFrame(animate);
-  }, []);
+  }, [type]);
 
   return (
     <div className="relative h-screen w-screen flex items-center justify-center overflow-hidden pointer-events-none z-[9999] bg-gray-900">

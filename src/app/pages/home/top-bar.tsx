@@ -16,8 +16,6 @@ const TopBar = () => {
             <div className="flex-1 flex justify-end">
                 <AvatarMenu/>
             </div>
-            
-            
         </div>
     )
 }
