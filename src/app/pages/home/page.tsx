@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { useEffect } from "react";
 
 const RainAnimation = dynamic(()=> import ("./rainAnimation"), {ssr:false});
+const GoodRainAnimation = dynamic(() => import ("./GoodRainAnimation"),{ssr:false});
 
 const HomePage = () => {
   const [weather, setWeather] = useState("thunderstorm");
@@ -58,12 +59,12 @@ const HomePage = () => {
        <div className="fixed inset-0 z-[0] pointer-events-none w-screen h-screen flex items-center justify-center">
       {/* Overlay for rain */}
       {weather === "rain" && (
-        <RainAnimation type ="medium"/>
+        <GoodRainAnimation type ="rain"/>
       )}
 
       {/* Overlay for thunderstorm */}
       {weather === "thunderstorm" && (
-        <RainAnimation type="downpour"/>
+        <GoodRainAnimation type="thunderstorm"/>
       )}
      
         {/* Overlay for snow */}
