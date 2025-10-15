@@ -124,7 +124,7 @@ export default function Home() {
       <button onClick={handleLogin} className=" bg-red-500 hover:bg-red-300 text-white font-bold py-2 px-6 rounded mb-6"> Login </button>
       <button onClick={handleRegister} className= " bg-yellow-500 hover:bg-yellow-300 text-black font-bold py-2 px-6 rounded mb-6"> Register </button>
       <button onClick={handleDashboard} className = "bg-green-500 hover:opacity-75 text-black font-bold py-2 px-6 rounded mb-6"> Dashboard</button>
-      <button onClick={handleFlashbang} className = "bg-black hover:opacity-75 text-white font-bold py-2 px-6 rounded mb-6">Cougars near you</button>
+      <button onClick={handleFlashbang} className = "bg-black hover:opacity-75 text-white font-bold py-2 px-6 rounded mb-6">Flashbang</button>
     </div>
   );
 }
