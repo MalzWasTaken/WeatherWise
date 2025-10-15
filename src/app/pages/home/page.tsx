@@ -38,13 +38,13 @@ const HomePage = () => {
       case "clear":
         return "from-sky-300 to-yellow-200";
       case "rain":
-        return "from-gray-400 to-blue-600";
+        return "from-gray-500 to-gray-600";
       case "cloudy":
         return "from-gray-200 to-gray-400";
       case "snow":
-        return "from-blue-100 to-blue-300"; // or whatever you want
+        return "from-gray-400 to-gray-400";
       case "thunderstorm":
-        return "from-gray-700 to-indigo-900";
+        return "from-gray-700 to-gray-900";
       case "mist":
       case "fog":
         return "from-gray-300 to-gray-500";

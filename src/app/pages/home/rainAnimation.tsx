@@ -10,6 +10,10 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
   }
 
   export default function RainAnimation({type = "medium"}: RainAnimationProps) {
+  // Set larger radius for snow (drizzle type)
+  const isSnow = type === "drizzle";
+  const raindropRadius = isSnow ? 4 : 1.3;
+  const particleRadius = isSnow ? 2.5 : 0.4;
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -106,7 +110,7 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
       constructor(x: number, accX: number, accY: number) {
         this.damping = 0.025;
         this.location = createVector(x, canvasHeight);
-        this.radius = 0.4;
+        this.radius = particleRadius;
         this.velocity = createVector(0, 0);
         this.acceleration = createVector(accX, -(accY * this.damping));
         this.mass = 1;
@@ -138,7 +142,7 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
       constructor(x: number, y: number, radius: number, accY: number) {
         this.location = createVector(x, y);
-        this.radius = radius;
+        this.radius = raindropRadius;
         this.velocity = createVector(0, 0);
         this.acceleration = createVector(0, accY);
         this.mass = 1;
@@ -179,7 +183,7 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
         const x = getRandomInteger(2, canvas.width - 2);
         const y = getRandomInteger(-2000, 0);
         const accY = environment.raintype.speed;
-        raindrop[i] = new Raindrop(x, y, 1.3, accY);
+        raindrop[i] = new Raindrop(x, y, raindropRadius, accY);
       }
     };
     initRaindrops();
@@ -233,9 +237,9 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
   }, [type]);
 
   return (
-    <div className="relative h-screen w-screen flex items-center justify-center overflow-hidden pointer-events-none z-[9999] bg-gray-900">
-      <div id="sky-top" className="absolute inset-0 bg-gray-800 animate-[lightning_20s_ease-in-out_infinite] z-10"></div>
-      <div id="sky-bottom" className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-400 z-20"></div>
+    <div className="relative h-screen w-screen flex items-center justify-center overflow-hidden pointer-events-none z-[9999] bg-transparent">
+      <div id="sky-top" className="absolute inset-0 bg-transparent animate-[lightning_20s_ease-in-out_infinite] z-10"></div>
+      <div id="sky-bottom" className="absolute inset-0 bg-gradient-to-b from-transparent to-transparent z-20"></div>
       <canvas ref={canvasRef} className="absolute border border-black bg-transparent z-30" />
     </div>
   );
