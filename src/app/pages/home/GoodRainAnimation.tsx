@@ -16,8 +16,8 @@ const GoodRainAnimation: React.FC<GoodRainAnimationProps> = ({ type = "rain" }) 
     const drops: JSX.Element[] = [];
     const backDrops: JSX.Element[] = [];
 
-    // 💧 More drops for thunderstorm
-    const rainDensity = type === "thunderstorm" ? 200 : 100;
+    //  More drops for thunderstorm
+    const rainDensity = type === "thunderstorm" ? 300 : 200;
 
     let increment = 0;
     while (increment < rainDensity) {
@@ -25,8 +25,8 @@ const GoodRainAnimation: React.FC<GoodRainAnimationProps> = ({ type = "rain" }) 
       const randoFiver = Math.floor(Math.random() * 4) + 2;
       increment += randoFiver;
 
-      // ⚡ Faster + heavier rain in thunderstorm
-      const durationBase = type === "thunderstorm" ? 0.3 : 0.5;
+      //  Faster + heavier rain in thunderstorm
+      const durationBase = type === "thunderstorm" ? 0.2 : 0.4;
 
       const dropStyle: CSSProperties = {
         left: `${(increment / rainDensity) * 100}%`,
@@ -41,7 +41,7 @@ const GoodRainAnimation: React.FC<GoodRainAnimationProps> = ({ type = "rain" }) 
           className="absolute bottom-full w-[15px] h-[120px] pointer-events-none animate-[drop_0.5s_linear_infinite]"
           style={dropStyle}
         >
-          {/* 💦 Visible rain stem */}
+          {/* Visible rain stem */}
           <div
             className={`w-px h-[60%] ml-[7px] bg-gradient-to-b from-transparent ${
               type === "thunderstorm" ? "to-white/70" : "to-white/40"
@@ -52,7 +52,7 @@ const GoodRainAnimation: React.FC<GoodRainAnimationProps> = ({ type = "rain" }) 
             }}
           ></div>
 
-          {/* 💥 Small splat */}
+          {/* Small splat */}
           <div
             className={`w-[15px] h-[10px] border-t-2 border-dotted ${
               type === "thunderstorm" ? "border-white/50" : "border-white/30"
