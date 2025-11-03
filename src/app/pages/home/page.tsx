@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { auth0 } from "../../../lib/auth0";
+import { ForecastCard } from "./ForecastCard";
 
 const RainAnimation = dynamic(() => import("./rainAnimation"), { ssr: false });
 const GoodRainAnimation = dynamic(() => import("./GoodRainAnimation"), {
@@ -42,6 +43,7 @@ const HomePageWrapper = () => {
   return <HomePage />;
 };
 
+
 const HomePage = () => {
   const [weather, setWeather] = useState("thunderstorm");
   const router = useRouter();
@@ -51,6 +53,7 @@ const HomePage = () => {
   const handleRain = () => setWeather("rain");
   const handleThunder = () => setWeather("thunderstorm");
   const handleSnow = () => setWeather("snow");
+  const handleClear = () => setWeather("clear")
 
   const getBackground = (weather: string): string => {
     switch (weather?.toLowerCase()) {
@@ -87,6 +90,18 @@ const HomePage = () => {
       </div>
 
       <TopBar />
+      <div className="grid grid-cols-2 h-full w-full">
+        <ForecastCard weather = {weather}/>
+      </div>
+      
+
+      <button 
+      className={`${
+        weather === "clear" ? "bg-green-400 hover:bg-green-300" : "bg-black"}
+      } text-white font-bold py-2 px-6 rounded mb-6 mt-6 z-[2]`}
+      onClick={handleClear}>
+        Sunny
+      </button>
 
       <button
         className={`${
