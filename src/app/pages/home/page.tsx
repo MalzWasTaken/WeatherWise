@@ -5,9 +5,6 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { auth0 } from "../../../lib/auth0";
-import { useGeolocation } from "@uidotdev/usehooks";
-import Toast from "typescript-toastify";
-import { ForecastCard } from "./ForecastCard";
 
 const RainAnimation = dynamic(() => import("./rainAnimation"), { ssr: false });
 const GoodRainAnimation = dynamic(() => import("./GoodRainAnimation"), {
@@ -173,12 +170,52 @@ const HomePageWrapper = () => {
 const HomePage = ({ user }: { user: any }) => {
   const [weather, setWeather] = useState("thunderstorm");
   const router = useRouter();
+  const state = useGeolocation();
+  const [location, setLocation] = useState();
 
-  const handleBack = () => router.push("/");
+  let currentToast = 0;
+  let maxToast = 1;
 
-  const handleRain = () => setWeather("rain");
-  const handleThunder = () => setWeather("thunderstorm");
-  const handleSnow = () => setWeather("snow");
+  //Creates toast popup when click
+  const handleClick = () => {
+    if (currentToast >= maxToast) {
+      return;
+    }
+    const toast = new Toast({
+      toastMsg: "Hello World",
+      autoCloseTime: 3000,
+      theme: "dark",
+      type: "error",
+      onClose: () => {
+        currentToast--;
+      },
+    });
+    currentToast++;
+    console.log(currentToast);
+  };
+
+  //Fetches weather via backend
+  const fetchWeather = async (cityName: string) => {
+    try {
+      console.log("Fetching weather for:", cityName);
+      const res = await fetch(
+        `${backendUrl}/api/weather?city=${encodeURIComponent(cityName)}`
+      );
+      const text = await res.text();
+      console.log("Data in text:");
+      const data = text ? JSON.parse(text) : null;
+      if (!data) return;
+      Object.entries(data.current).forEach(([key, value]) => {
+        console.log(key, ":", value);
+      });
+    } catch (err) {
+      console.error("Error occured at fetchWeather", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchWeather("London");
+  }, []);
 
   const getBackground = (weather: string) => {
     switch (weather?.toLowerCase()) {
@@ -215,6 +252,30 @@ const HomePage = ({ user }: { user: any }) => {
       </div>
 
       <TopBar />
+
+      {user && (
+        <div className="z-[2] bg-white/30 backdrop-blur-md p-4 rounded-xl mt-4 text-center">
+          <img
+            className="w-16 h-16 mx-auto mb-2"
+            src={user.picture}
+            alt={user.name}
+          />
+          <h2 className="font-bold text-lg">{user.name}</h2>
+          <p className="text-sm">{user.email}</p>
+        </div>
+      )}
+
+      <h2 className="text-white">
+        {state.loading
+          ? "Getting location..."
+          : state.latitude && state.longitude
+          ? `Latitude: ${state.latitude} Longitude: ${state.longitude}`
+          : "Location unavailable - Enable Location Again"}
+      </h2>
+
+      <button className="bg-blue-50" onClick={handleClick}>
+        Click Me
+      </button>
 
       <button
         className={`${
