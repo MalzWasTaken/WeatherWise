@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { auth0 } from "../../../lib/auth0";
 import { useGeolocation } from "@uidotdev/usehooks";
 import Toast from "typescript-toastify";
+import { ForecastCard } from "./ForecastCard";
 
 const RainAnimation = dynamic(() => import("./rainAnimation"), { ssr: false });
 const GoodRainAnimation = dynamic(() => import("./GoodRainAnimation"), {
@@ -21,7 +22,6 @@ const HomePageWrapper = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      //If user is not authenticated, redirect to back to main
       try {
         if (
           window.location.search.includes("code=") ||
@@ -34,10 +34,9 @@ const HomePageWrapper = () => {
         if (!isAuthenticated) {
           await auth0.logout({
             logoutParams: { returnTo: window.location.origin },
-          })
+          });
         }
 
-        //Check if user exists in backend
         const userProfile = await auth0.getUser();
         setUser(userProfile);
 
@@ -49,14 +48,11 @@ const HomePageWrapper = () => {
           );
 
           let existingUser = null;
-
-          // Check if https response is within range
           if (response.ok) {
             const text = await response.text();
             existingUser = text ? JSON.parse(text) : null;
           }
 
-          // If user exists, update user details and redirect to dashboard
           if (existingUser) {
             console.log("Existing user found:", existingUser);
             const updateResponse = await fetch(
@@ -77,12 +73,12 @@ const HomePageWrapper = () => {
                 }),
               }
             );
+
             if (updateResponse.ok) {
               await updateResponse.json();
               router.replace("/pages/home");
 
-              //Toast popup - Existing User
-              const toast = new Toast({
+              new Toast({
                 toastMsg: "Welcome back, " + userProfile.nickname,
                 autoCloseTime: 3000,
                 theme: "dark",
@@ -92,7 +88,6 @@ const HomePageWrapper = () => {
             return;
           }
 
-          //If user does not exist, create new user in backend
           console.log("No existing user, creating new user.");
 
           const createResponse = await fetch(`${backendUrl}/api/users/add`, {
@@ -107,21 +102,18 @@ const HomePageWrapper = () => {
             }),
           });
 
-          //Then redirect to dashboard
           if (createResponse.ok) {
             await createResponse.json();
             router.replace("/pages/home");
             console.log("New user created successfully.");
 
-            //Toast popup - new user
-            const toast = new Toast({
+            new Toast({
               toastMsg: "Welcome, " + userProfile.nickname,
               autoCloseTime: 3000,
               theme: "dark",
               type: "success",
             });
 
-            //Send a welcome message to user via backend email
             const email = await fetch(`${backendUrl}/api/email`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -134,24 +126,16 @@ const HomePageWrapper = () => {
                 image: "../images/image.png",
               }),
             });
-            if (email.ok) {
-              const data = await email.json();
-              console.log(data);
-            } else {
-              const data = await email.json();
-              console.log(data);
-            }
+            const data = await email.json();
+            console.log(data);
           }
         }
-        //catch any errors and redirect to main
       } catch (err) {
-        console.log("Error in Authenticaton", err);
-
+        console.log("Error in Authentication", err);
         router.replace("/");
 
-        //Toast popup - Error
         setTimeout(() => {
-          const toast = new Toast({
+          new Toast({
             toastMsg: "Error Occurred - Please Try Again",
             autoCloseTime: 3000,
             theme: "dark",
@@ -168,7 +152,6 @@ const HomePageWrapper = () => {
   return <HomePage user={user} />;
 };
 
-
 const HomePage = ({ user }: { user: any }) => {
   const [weather, setWeather] = useState("thunderstorm");
   const router = useRouter();
@@ -178,12 +161,9 @@ const HomePage = ({ user }: { user: any }) => {
   let currentToast = 0;
   let maxToast = 1;
 
-  //Creates toast popup when click
   const handleClick = () => {
-    if (currentToast >= maxToast) {
-      return;
-    }
-    const toast = new Toast({
+    if (currentToast >= maxToast) return;
+    new Toast({
       toastMsg: "Hello World",
       autoCloseTime: 3000,
       theme: "dark",
@@ -193,10 +173,13 @@ const HomePage = ({ user }: { user: any }) => {
       },
     });
     currentToast++;
-    console.log(currentToast);
   };
 
-  //Fetches weather via backend
+  const handleRain = () => setWeather("rain");
+  const handleThunder = () => setWeather("thunderstorm");
+  const handleSnow = () => setWeather("snow");
+  const handleClear = () => setWeather("clear");
+
   const fetchWeather = async (cityName: string) => {
     try {
       console.log("Fetching weather for:", cityName);
@@ -204,19 +187,18 @@ const HomePage = ({ user }: { user: any }) => {
         `${backendUrl}/api/weather?city=${encodeURIComponent(cityName)}`
       );
       const text = await res.text();
-      console.log("Data in text:");
       const data = text ? JSON.parse(text) : null;
       if (!data) return;
       Object.entries(data.current).forEach(([key, value]) => {
         console.log(key, ":", value);
       });
     } catch (err) {
-      console.error("Error occured at fetchWeather", err);
+      console.error("Error occurred at fetchWeather", err);
     }
   };
 
   useEffect(() => {
-    fetchWeather("London");
+    fetchWeather("Paris");
   }, []);
 
   const getBackground = (weather: string) => {
@@ -255,6 +237,11 @@ const HomePage = ({ user }: { user: any }) => {
 
       <TopBar />
 
+      {/* Forecast Section */}
+      <div className="grid grid-cols-2 h-full w-full z-[2]">
+        <ForecastCard weather={weather} />
+      </div>
+
       {user && (
         <div className="z-[2] bg-white/30 backdrop-blur-md p-4 rounded-xl mt-4 text-center">
           <img
@@ -281,27 +268,38 @@ const HomePage = ({ user }: { user: any }) => {
 
       <button
         className={`${
+          weather === "clear" ? "bg-green-400 hover:bg-green-300" : "bg-black"
+        } text-white font-bold py-2 px-6 rounded mb-6 mt-6 z-[2]`}
+        onClick={handleClear}
+      >
+        Sunny
+      </button>
+
+      <button
+        className={`${
           weather === "snow" ? "bg-green-400 hover:bg-green-300" : "bg-black"
         } text-white font-bold py-2 px-6 rounded mb-6 mt-6 z-[2]`}
-        onClick={() => setWeather("snow")}
+        onClick={handleSnow}
       >
-        Snowy snow
+        Snowy Weather
       </button>
+
       <button
         className={`${
           weather === "rain" ? "bg-green-400 hover:bg-green-300" : "bg-black"
         } text-white font-bold py-2 px-6 rounded mb-6 mt-6 z-[2]`}
-        onClick={() => setWeather("rain")}
+        onClick={handleRain}
       >
         Rainy Weather
       </button>
+
       <button
         className={`${
           weather === "thunderstorm"
             ? "bg-green-400 hover:bg-green-300"
             : "bg-black"
         } text-white font-bold py-2 px-6 rounded mb-6 mt-6 z-[2]`}
-        onClick={() => setWeather("thunderstorm")}
+        onClick={handleThunder}
       >
         Thundery Weather
       </button>
