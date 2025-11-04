@@ -180,25 +180,42 @@ const HomePage = ({ user }: { user: any }) => {
   const handleSnow = () => setWeather("snow");
   const handleClear = () => setWeather("clear");
 
-  const fetchWeather = async (cityName: string) => {
-    try {
-      console.log("Fetching weather for:", cityName);
-      const res = await fetch(
-        `${backendUrl}/api/weather?city=${encodeURIComponent(cityName)}`
-      );
-      const text = await res.text();
-      const data = text ? JSON.parse(text) : null;
-      if (!data) return;
-      Object.entries(data.current).forEach(([key, value]) => {
-        console.log(key, ":", value);
-      });
-    } catch (err) {
-      console.error("Error occurred at fetchWeather", err);
+const fetchWeather = async (cityName: string) => {
+  try {
+    console.log("Fetching weather for:", cityName);
+    const res = await fetch(
+      `${backendUrl}/api/weather?city=${encodeURIComponent(cityName)}`
+    );
+    const text = await res.text();
+    const data = text ? JSON.parse(text) : null;
+    if (!data) return;
+
+    console.log("=== Current Weather ===");
+    Object.entries(data.current).forEach(([key, value]) => {
+      console.log(key, ":", value);
+    });
+
+console.log("7 Day Forecast: ");
+if (data.forecast && Array.isArray(data.forecast.forecastday)) {
+  data.forecast.forecastday.forEach((day: any) => {
+    console.log("Date:", day.date);
+    console.log("Max Temp:", day.day.maxtemp_c, "°C");
+    console.log("Min Temp:", day.day.mintemp_c, "°C");
+    console.log("Condition:", day.day.condition.text);
+    console.log("---");
+  });
+} else {
+  console.log("No forecast data available");
+
     }
-  };
+  } catch (err) {
+    console.error("Error occurred at fetchWeather", err);
+  }
+};
+
 
   useEffect(() => {
-    fetchWeather("Paris");
+    fetchWeather("Houston");
   }, []);
 
   const getBackground = (weather: string) => {
