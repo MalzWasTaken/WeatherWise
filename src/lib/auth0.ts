@@ -6,8 +6,9 @@ export const auth0 = new Auth0Client({
   authorizationParams: {
     redirect_uri:
       typeof window !== "undefined" ? `${window.location.origin}/pages/home` : undefined,
+    scope: "openid profile email",
   },
 });
 
-console.log("Auth0 domain:", process.env.NEXT_PUBLIC_AUTH0_DOMAIN);
-console.log("Auth0 clientId:", process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID);
+// console.log("Auth0 domain:", process.env.NEXT_PUBLIC_AUTH0_DOMAIN);
+// console.log("Auth0 clientId:", process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID);

@@ -1,4 +1,8 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+import path from "path";
+dotenv.config({ path: path.resolve(process.cwd(), "backend", ".env") });
+
+console.log(dotenv.config());
 
 export const development = {
   client: "postgresql",
@@ -31,5 +35,6 @@ export const production = {
     tableName: "knex_migrations",
   },
 };
+
 
 export default { development, production };
