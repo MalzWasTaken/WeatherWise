@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState } from 'react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import {
   Card,
@@ -14,6 +15,13 @@ import PartlyCloudyRain from './WeatherIcons/PartlyCloudyRain';
 import Sunny from './WeatherIcons/Sunny';
 import Thunderstorm from './WeatherIcons/Thunderstorm';
 import Snow from './WeatherIcons/Snow';
+import NightClear from './WeatherIcons/NightClear';
+import NightRain from './WeatherIcons/NightRain';
+import NightSnow from './WeatherIcons/NightSnow';
+import SunnySnow from './WeatherIcons/SunnySnow';
+
+
+
 
 
 interface ForecastCardProps {
@@ -21,6 +29,8 @@ interface ForecastCardProps {
 }
 
 export function ForecastCard({weather}: ForecastCardProps) {
+
+    const [time,setTime] = useState('00:00');
 
     console.log(weather)
     return (
