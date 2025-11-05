@@ -7,13 +7,15 @@ interface WeatherDetailsCardProps {
   windSpeed: number;
   visibility: number;
   pressure: number;
+  isNight?: boolean;
 }
 
 export function WeatherDetailsCard({ 
   humidity, 
   windSpeed, 
   visibility, 
-  pressure 
+  pressure,
+  isNight = false
 }: WeatherDetailsCardProps) {
   return (
     <Card className="w-full h-full bg-white/20 backdrop-blur-md border-white/30 hover:scale-105 transition-all duration-300">

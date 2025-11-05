@@ -5,9 +5,10 @@ interface TemperatureCardProps {
   temperature: number;
   location: string;
   timezone?: string;
+  isNight?: boolean;
 }
 
-export function TemperatureCard({ temperature, location, timezone = "Europe/London" }: TemperatureCardProps) {
+export function TemperatureCard({ temperature, location, timezone = "Europe/London", isNight = false }: TemperatureCardProps) {
   const [localTime, setLocalTime] = useState('');
 
   useEffect(() => {
@@ -22,10 +23,10 @@ export function TemperatureCard({ temperature, location, timezone = "Europe/Lond
       setLocalTime(time);
     };
 
-    // Update time immediately
+    
     updateTime();
 
-    // Update time every second
+    //Time updates every second
     const interval = setInterval(updateTime, 1000);
 
     return () => clearInterval(interval);

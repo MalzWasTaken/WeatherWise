@@ -32,9 +32,10 @@ interface ForecastCardProps {
     location?: string;
     description?: string;
     timezone?: string;
+    isNight?: boolean;
 }
 
-export function ForecastCard({weather, temperature = 22, location = "London", description, timezone = "Europe/London"}: ForecastCardProps) {
+export function ForecastCard({weather, temperature = 22, location = "London", description, timezone = "Europe/London", isNight = false}: ForecastCardProps) {
 
     const [time,setTime] = useState('00:00');
 
@@ -78,14 +79,6 @@ export function ForecastCard({weather, temperature = 22, location = "London", de
                 <div className="flex-1 flex items-center justify-center min-h-0 overflow-hidden">
                     <div className="flex items-center justify-center max-w-xs max-h-xs">
                         {(() => {
-                            const locationTime = new Date().toLocaleString("en-US", {
-                                timeZone: timezone,
-                                hour12: false,
-                                hour: "2-digit"
-                            });
-                            const currentHour = parseInt(locationTime.split(':')[0]);
-                            const isNight = currentHour >= 19 || currentHour <= 6;
-                            
                             switch (weather?.toLowerCase()) {
                                 case "rain":
                                     return isNight ? <NightRain /> : <PartlyCloudyRain />;

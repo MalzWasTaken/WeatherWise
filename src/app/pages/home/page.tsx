@@ -166,8 +166,31 @@ const HomePage = ({ user }: { user: any }) => {
     description: "Partly Cloudy",
     timezone: "Europe/London"
   });
+  const [isNight, setIsNight] = useState(false);
   const router = useRouter();
   const state = useGeolocation();
+
+  
+  useEffect(() => {
+    const updateTimeAndNight = () => {
+      const now = new Date();
+      const currentTime = new Intl.DateTimeFormat("en-US", {
+        timeZone: weatherData.timezone,
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(now);
+
+      const currentHour = parseInt(currentTime.split(':')[0], 10);
+      const nightTime = currentHour >= 19 || currentHour <= 6;
+      setIsNight(nightTime);
+    };
+
+    updateTimeAndNight();
+    const interval = setInterval(updateTimeAndNight, 60000); 
+
+    return () => clearInterval(interval);
+  }, [weatherData.timezone]);
 
   let currentToast = 0;
   const maxToast = 1;
@@ -265,32 +288,55 @@ if (data.forecast && Array.isArray(data.forecast.forecastday)) {
     fetchWeather("Houston");
   }, []);
 
-  const getBackground = (weather: string) => {
-    switch (weather?.toLowerCase()) {
-      case "clear":
-        return "from-sky-300 to-yellow-200";
-      case "rain":
-        return "from-gray-700 to-gray-800";
-      case "cloudy":
-        return "from-gray-200 to-gray-400";
-      case "snow":
-        return "from-gray-400 to-gray-400";
-      case "thunderstorm":
-        return "from-gray-800 to-gray-900";
-      case "mist":
-      case "fog":
-        return "from-gray-300 to-gray-500";
-      case "partly-cloudy":
-        return "from-blue-300 to-gray-300";
-      default:
-        return "from-blue-200 to-blue-400";
+  const getBackground = (weather: string, isNight: boolean) => {
+    if (isNight) {
+      switch (weather?.toLowerCase()) {
+        case "clear":
+          return "from-indigo-900 to-purple-900";
+        case "rain":
+          return "from-gray-900 to-black";
+        case "cloudy":
+          return "from-gray-800 to-gray-900";
+        case "snow":
+          return "from-slate-800 to-slate-900";
+        case "thunderstorm":
+          return "from-black to-gray-900";
+        case "mist":
+        case "fog":
+          return "from-gray-700 to-gray-900";
+        case "partly-cloudy":
+          return "from-blue-900 to-gray-800";
+        default:
+          return "from-indigo-800 to-purple-800";
+      }
+    } else {
+      switch (weather?.toLowerCase()) {
+        case "clear":
+          return "from-sky-300 to-yellow-200";
+        case "rain":
+          return "from-gray-700 to-gray-800";
+        case "cloudy":
+          return "from-gray-200 to-gray-400";
+        case "snow":
+          return "from-gray-400 to-gray-400";
+        case "thunderstorm":
+          return "from-gray-800 to-gray-900";
+        case "mist":
+        case "fog":
+          return "from-gray-300 to-gray-500";
+        case "partly-cloudy":
+          return "from-blue-300 to-gray-300";
+        default:
+          return "from-blue-200 to-blue-400";
+      }
     }
   };
 
   return (
     <div
       className={`min-h-screen z-[1] flex flex-col items-center text-gray-800 transition-all duration-700 bg-gradient-to-b p-4 ${getBackground(
-        weather
+        weather,
+        isNight
       )}`}
     >
       <div className="fixed inset-0 z-[0] pointer-events-none w-screen h-screen flex items-center justify-center">
@@ -312,6 +358,7 @@ if (data.forecast && Array.isArray(data.forecast.forecastday)) {
             location={weatherData.location}
             description={weatherData.description}
             timezone={weatherData.timezone}
+            isNight={isNight}
           />
         </div>
         
@@ -321,6 +368,7 @@ if (data.forecast && Array.isArray(data.forecast.forecastday)) {
               temperature={weatherData.temperature}
               location={weatherData.location}
               timezone={weatherData.timezone}
+              isNight={isNight}
             />
           </div>
           <div className="flex-1">
@@ -329,6 +377,7 @@ if (data.forecast && Array.isArray(data.forecast.forecastday)) {
               windSpeed={weatherData.windSpeed}
               visibility={weatherData.visibility}
               pressure={weatherData.pressure}
+              isNight={isNight}
             />
           </div>
         </div>
