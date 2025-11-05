@@ -1,10 +1,13 @@
 "use client"
 import { useState } from "react";
-import { SearchBar } from "./input";
+import { SearchBarWithSuggestions } from "./SearchBarWithSuggestions";
 import { AvatarMenu } from "./avatar-menu";
 
+interface TopBarProps {
+  onCitySelect: (cityName: string) => void;
+}
 
-const TopBar = () => {
+const TopBar = ({ onCitySelect }: TopBarProps) => {
     return (
       <div className="flex flex-col w-full mb-4 p-4">
         <div className="flex flex-row items-center justify-between w-full">
@@ -15,14 +18,14 @@ const TopBar = () => {
             <h1 className = "lg:text-4xl">⛅</h1>
           </div>
           <div className="flex-1 sm:flex justify-center hidden ">
-            <SearchBar />
+            <SearchBarWithSuggestions onCitySelect={onCitySelect} />
           </div>
           <div className="flex-1 flex justify-end">
             <AvatarMenu />
           </div>
         </div>
         <div className="w-full flex justify-center mt-4 sm:hidden ">
-          <SearchBar />
+          <SearchBarWithSuggestions onCitySelect={onCitySelect} />
         </div>
       </div>
     );

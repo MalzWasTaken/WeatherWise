@@ -8,6 +8,8 @@ import { auth0 } from "../../../lib/auth0";
 import { useGeolocation } from "@uidotdev/usehooks";
 import Toast from "typescript-toastify";
 import { ForecastCard } from "./ForecastCard";
+import { TemperatureCard } from "./TemperatureCard";
+import { WeatherDetailsCard } from "./WeatherDetailsCard";
 
 const RainAnimation = dynamic(() => import("./rainAnimation"), { ssr: false });
 const GoodRainAnimation = dynamic(() => import("./GoodRainAnimation"), {
@@ -154,12 +156,20 @@ const HomePageWrapper = () => {
 
 const HomePage = ({ user }: { user: any }) => {
   const [weather, setWeather] = useState("thunderstorm");
+  const [weatherData, setWeatherData] = useState({
+    temperature: 22,
+    location: "London",
+    humidity: 65,
+    windSpeed: 12,
+    visibility: 10,
+    pressure: 1013,
+    description: "Partly Cloudy"
+  });
   const router = useRouter();
   const state = useGeolocation();
-  const [location, setLocation] = useState();
 
   let currentToast = 0;
-  let maxToast = 1;
+  const maxToast = 1;
 
   const handleClick = () => {
     if (currentToast >= maxToast) return;
@@ -190,7 +200,36 @@ const fetchWeather = async (cityName: string) => {
     const data = text ? JSON.parse(text) : null;
     if (!data) return;
 
-    console.log("=== Current Weather ===");
+    console.log("=== Current Weather ===")
+      
+     
+      setWeatherData({
+        temperature: Math.round(data.current.temp_c),
+        location: `${data.location.name}, ${data.location.country}`,
+        humidity: data.current.humidity,
+        windSpeed: Math.round(data.current.wind_mph),
+        visibility: Math.round(data.current.vis_miles),
+        pressure: Math.round(data.current.pressure_mb),
+        description: data.current.condition.text
+      });
+      
+      
+      const condition = data.current.condition.text.toLowerCase();
+      if (condition.includes('rain') || condition.includes('drizzle')) {
+        setWeather('rain');
+      } else if (condition.includes('thunder') || condition.includes('storm')) {
+        setWeather('thunderstorm');
+      } else if (condition.includes('snow') || condition.includes('blizzard')) {
+        setWeather('snow');
+      } else if (condition.includes('clear') || condition.includes('sunny')) {
+        setWeather('clear');
+      } else if (condition.includes('cloudy') || condition.includes('foggy')){
+        setWeather('cloudy');
+      } else {
+        setWeather('clear'); // default
+      }
+      
+
     Object.entries(data.current).forEach(([key, value]) => {
       console.log(key, ":", value);
     });
@@ -252,11 +291,35 @@ if (data.forecast && Array.isArray(data.forecast.forecastday)) {
         {weather === "snow" && <RainAnimation type="drizzle" />}
       </div>
 
-      <TopBar />
+      <TopBar onCitySelect={fetchWeather} />
 
-      {/* Forecast Section */}
-      <div className="grid grid-cols-2 h-full w-full z-[2]">
-        <ForecastCard weather={weather} />
+    
+      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8 mb-8 z-[2] px-4 lg:h-[500px]">
+        <div className="lg:col-span-2 h-full">
+          <ForecastCard 
+            weather={weather} 
+            temperature={weatherData.temperature}
+            location={weatherData.location}
+            description={weatherData.description}
+          />
+        </div>
+        
+        <div className="space-y-6 h-full flex flex-col">
+          <div className="flex-1">
+            <TemperatureCard 
+              temperature={weatherData.temperature}
+              location={weatherData.location}
+            />
+          </div>
+          <div className="flex-1">
+            <WeatherDetailsCard 
+              humidity={weatherData.humidity}
+              windSpeed={weatherData.windSpeed}
+              visibility={weatherData.visibility}
+              pressure={weatherData.pressure}
+            />
+          </div>
+        </div>
       </div>
 
       {user && (
