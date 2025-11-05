@@ -10,6 +10,8 @@ import Toast from "typescript-toastify";
 import { ForecastCard } from "./ForecastCard";
 import { TemperatureCard } from "./TemperatureCard";
 import { WeatherDetailsCard } from "./WeatherDetailsCard";
+import StarBackground from "./StarBackground";
+import { FakeProgress } from "./FakeProgress";
 
 const RainAnimation = dynamic(() => import("./rainAnimation"), { ssr: false });
 const GoodRainAnimation = dynamic(() => import("./GoodRainAnimation"), {
@@ -214,6 +216,7 @@ const HomePage = ({ user }: { user: any }) => {
   const handleSnow = () => setWeather("snow");
   const handleClear = () => setWeather("clear");
 
+
 const fetchWeather = async (cityName: string) => {
   try {
     console.log("Fetching weather for:", cityName);
@@ -283,10 +286,39 @@ if (data.forecast && Array.isArray(data.forecast.forecastday)) {
   }
 };
 
+const [isLoadingWeather, setIsLoadingWeather] = useState(true);
 
+  
   useEffect(() => {
-    fetchWeather("Houston");
-  }, []);
+    const getUserLocationWeather = async () => {
+      setIsLoadingWeather(true);
+      
+      if (state.latitude && state.longitude) {
+        try {
+          
+          const response = await fetch(
+            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${state.latitude}&longitude=${state.longitude}&localityLanguage=en`
+          );
+          const locationData = await response.json();
+          const userCity = locationData.city || locationData.locality || "Houston";
+          
+          console.log("User's city:", userCity);
+          await fetchWeather(userCity);
+          setIsLoadingWeather(false);
+        } catch (error) {
+          console.error("Error getting user location:", error);
+          await fetchWeather("Houston"); 
+          setIsLoadingWeather(false);
+        }
+      } else if (!state.loading && state.error) {
+        
+        await fetchWeather("Houston");
+        setIsLoadingWeather(false);
+      }
+    };
+
+    getUserLocationWeather();
+  }, [state.latitude, state.longitude, state.loading, state.error]);
 
   const getBackground = (weather: string, isNight: boolean) => {
     if (isNight) {
@@ -332,6 +364,27 @@ if (data.forecast && Array.isArray(data.forecast.forecastday)) {
     }
   };
 
+
+
+  //Loading screen 
+  if (isLoadingWeather) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-400 to-blue-600 flex flex-col items-center justify-center text-white">
+        <div className="text-center space-y-6">
+          <div className="relative">
+            <div className="w-100">
+              <FakeProgress/>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold">Finding your location...</h2>
+            <p className="text-blue-100">Getting weather for your area</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`min-h-screen z-[1] flex flex-col items-center text-gray-800 transition-all duration-700 bg-gradient-to-b p-4 ${getBackground(
@@ -339,6 +392,8 @@ if (data.forecast && Array.isArray(data.forecast.forecastday)) {
         isNight
       )}`}
     >
+        {isNight && weather === "clear" && <StarBackground/>}
+    
       <div className="fixed inset-0 z-[0] pointer-events-none w-screen h-screen flex items-center justify-center">
         {weather === "rain" && <GoodRainAnimation type="rain" />}
         {weather === "thunderstorm" && (

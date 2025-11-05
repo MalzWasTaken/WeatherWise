@@ -1,0 +1,159 @@
+@import url("https://fonts.googleapis.com/css?family=Lato:300,400,700");
+
+.star-container {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+/* Stars layer 1 - Dense small stars */
+#stars {
+  width: 1px;
+  height: 1px;
+  background: transparent;
+  box-shadow: 
+    123px 456px #fff, 789px 101px #fff, 1500px 600px #fff, 1800px 1300px #fff, 
+    400px 1800px #fff, 700px 1600px #fff, 1900px 800px #fff, 300px 300px #fff, 
+    900px 1700px #fff, 1200px 100px #fff, 50px 850px #fff, 1650px 450px #fff,
+    320px 1200px #fff, 1450px 200px #fff, 880px 950px #fff, 1750px 1550px #fff,
+    250px 750px #fff, 1350px 350px #fff, 650px 1450px #fff, 1550px 1050px #fff,
+    450px 50px #fff, 1250px 1650px #fff, 850px 550px #fff, 1050px 1250px #fff,
+    150px 1550px #fff, 1850px 650px #fff, 550px 1350px #fff, 750px 250px #fff,
+    1650px 1750px #fff, 350px 1450px #fff, 1450px 750px #fff, 950px 450px #fff,
+    1750px 150px #fff, 450px 1650px #fff, 1150px 850px #fff, 250px 550px #fff,
+    1550px 1150px #fff, 650px 1750px #fff, 1350px 950px #fff, 850px 1450px #fff,
+    1050px 650px #fff, 1750px 1350px #fff, 550px 1050px #fff, 150px 250px #fff,
+    1450px 1550px #fff, 750px 150px #fff, 350px 1750px #fff, 1650px 550px #fff,
+    950px 1650px #fff, 1250px 950px #fff, 450px 250px #fff, 1850px 1450px #fff,
+    650px 650px #fff, 1150px 1850px #fff, 250px 1150px #fff, 1550px 350px #fff,
+    850px 1550px #fff, 1450px 1250px #fff, 550px 450px #fff, 150px 1650px #fff,
+    1750px 1750px #fff, 350px 850px #fff, 1650px 1450px #fff, 950px 1150px #fff,
+    80px 720px #fff, 1520px 320px #fff, 420px 1120px #fff, 1320px 1520px #fff,
+    720px 420px #fff, 1220px 820px #fff, 520px 1220px #fff, 820px 520px #fff,
+    1420px 120px #fff, 220px 1420px #fff, 1620px 720px #fff, 620px 320px #fff,
+    120px 1020px #fff, 1720px 1620px #fff, 380px 580px #fff, 1180px 980px #fff,
+    580px 1380px #fff, 980px 180px #fff, 1380px 1180px #fff, 280px 780px #fff;
+  animation: animStar 50s linear infinite;
+}
+
+#stars:after {
+  content: " ";
+  position: absolute;
+  top: 2000px;
+  width: 1px;
+  height: 1px;
+  background: transparent;
+  box-shadow: inherit;
+}
+
+/* Stars layer 2 - Dense small-medium stars */
+#stars2 {
+  width: 2px;
+  height: 2px;
+  background: transparent;
+  box-shadow: 
+    100px 800px #fff, 1400px 900px #fff, 1800px 1200px #fff, 200px 100px #fff, 
+    600px 1700px #fff, 1600px 300px #fff, 800px 500px #fff, 1200px 1600px #fff,
+    400px 200px #fff, 1000px 1400px #fff, 1500px 700px #fff, 300px 1100px #fff,
+    700px 1800px #fff, 1700px 400px #fff, 500px 900px #fff, 1300px 1300px #fff,
+    900px 600px #fff, 1100px 1700px #fff, 150px 1500px #fff, 1450px 250px #fff,
+    750px 1050px #fff, 1650px 1450px #fff, 350px 650px #fff, 1250px 1150px #fff,
+    950px 1750px #fff, 1550px 550px #fff, 250px 950px #fff, 1350px 1850px #fff,
+    650px 350px #fff, 1750px 1250px #fff, 450px 1650px #fff, 1050px 950px #fff,
+    850px 1550px #fff, 1150px 250px #fff, 550px 1350px #fff, 1850px 1050px #fff,
+    350px 450px #fff, 1450px 1650px #fff, 750px 750px #fff, 1650px 150px #fff,
+    950px 350px #fff, 1250px 1750px #fff, 450px 1150px #fff, 1550px 850px #fff,
+    650px 1450px #fff, 1750px 650px #fff, 250px 250px #fff, 1350px 1550px #fff,
+    75px 675px #fff, 1475px 275px #fff, 375px 1075px #fff, 1275px 1475px #fff,
+    675px 375px #fff, 1175px 775px #fff, 475px 1175px #fff, 775px 475px #fff,
+    1375px 75px #fff, 175px 1375px #fff, 1575px 675px #fff, 575px 275px #fff,
+    125px 975px #fff, 1675px 1575px #fff, 325px 525px #fff, 1125px 925px #fff,
+    525px 1325px #fff, 925px 125px #fff, 1325px 1125px #fff, 225px 725px #fff,
+    825px 225px #fff, 1425px 825px #fff, 625px 425px #fff, 1025px 1625px #fff;
+  animation: animStar 100s linear infinite;
+}
+
+#stars2:after {
+  content: " ";
+  position: absolute;
+  top: 2000px;
+  width: 1px;
+  height: 1px;
+  background: transparent;
+  box-shadow: inherit;
+}
+
+/* Stars layer 3 - Small accent stars */
+#stars3 {
+  width: 3px;
+  height: 3px;
+  background: transparent;
+  box-shadow: 
+    500px 600px #fff, 1100px 500px #fff, 1300px 900px #fff, 1900px 1500px #fff, 
+    400px 100px #fff, 800px 1400px #fff, 1600px 800px #fff, 200px 1200px #fff,
+    1000px 200px #fff, 600px 1600px #fff, 1400px 400px #fff, 300px 1000px #fff,
+    1200px 1800px #fff, 1800px 600px #fff, 700px 300px #fff, 1500px 1100px #fff,
+    900px 1700px #fff, 1700px 900px #fff, 100px 700px #fff, 1300px 1300px #fff,
+    1100px 100px #fff, 500px 1500px #fff, 1900px 700px #fff, 300px 500px #fff,
+    800px 1800px #fff, 1600px 200px #fff, 400px 1400px #fff, 1000px 1000px #fff,
+    1200px 600px #fff, 600px 800px #fff, 1800px 1400px #fff, 200px 300px #fff,
+    1400px 1700px #fff, 700px 1100px #fff, 1500px 300px #fff, 900px 900px #fff,
+    1700px 1800px #fff, 100px 1600px #fff, 1300px 200px #fff, 500px 1300px #fff,
+    60px 660px #fff, 1460px 260px #fff, 360px 1060px #fff, 1260px 1460px #fff,
+    660px 360px #fff, 1160px 760px #fff, 460px 1160px #fff, 760px 460px #fff,
+    1360px 60px #fff, 160px 1360px #fff, 1560px 660px #fff, 560px 260px #fff,
+    110px 960px #fff, 1660px 1560px #fff, 310px 510px #fff, 1110px 910px #fff,
+    510px 1310px #fff, 910px 110px #fff, 1310px 1110px #fff, 210px 710px #fff,
+    810px 210px #fff, 1410px 810px #fff, 610px 410px #fff, 1010px 1610px #fff;
+  animation: animStar 150s linear infinite;
+}
+
+#stars3:after {
+  content: " ";
+  position: absolute;
+  top: 2000px;
+  width: 3px;
+  height: 3px;
+  background: transparent;
+  box-shadow: inherit;
+}
+
+/* Optional title styling */
+#title {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  color: #fff;
+  text-align: center;
+  font-family: "Lato", sans-serif;
+  font-weight: 300;
+  font-size: 50px;
+  letter-spacing: 10px;
+  margin-top: -60px;
+  padding-left: 10px;
+}
+
+#title span {
+  background: -webkit-linear-gradient(white, #38495a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Animation */
+@keyframes animStar {
+  from {
+    transform: translateX(0px);
+  }
+  to {
+    transform: translateX(-2000px);
+  }
+}
+

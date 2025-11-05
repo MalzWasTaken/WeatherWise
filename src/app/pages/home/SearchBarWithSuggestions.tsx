@@ -40,7 +40,6 @@ export function SearchBarWithSuggestions({ onCitySelect }: SearchBarWithSuggesti
     };
   }, []);
 
-  // Debounced search for city suggestions
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (searchTerm.length >= 2) {
@@ -49,7 +48,7 @@ export function SearchBarWithSuggestions({ onCitySelect }: SearchBarWithSuggesti
         setSuggestions([]);
         setShowDropdown(false);
       }
-    }, 300);
+    }, 100);
 
     return () => clearTimeout(timeoutId);
   }, [searchTerm]);
@@ -106,6 +105,16 @@ export function SearchBarWithSuggestions({ onCitySelect }: SearchBarWithSuggesti
         <InputGroupAddon>
           <Search color="white" className={isLoading ? "animate-spin" : ""} />
         </InputGroupAddon>
+        
+        {searchTerm.length >= 2 && !isLoading && (
+          <InputGroupAddon align="inline-end">
+            <span className="text-white/70 text-sm">
+              {suggestions.length === 0 ? "No results" :
+               suggestions.length === 1 ? "1 result" :
+               `${suggestions.length} results`}
+            </span>
+          </InputGroupAddon>
+        )}
       </InputGroup>
 
       {showDropdown && suggestions.length > 0 && (
