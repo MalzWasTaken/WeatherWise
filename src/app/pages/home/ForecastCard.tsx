@@ -12,6 +12,7 @@ import {
 } from "../../../components/ui/card"
 import { Car } from "lucide-react"
 import PartlyCloudyRain from './WeatherIcons/PartlyCloudyRain';
+import PartlyCloudy from './WeatherIcons/PartlyCloudy';
 import Sunny from './WeatherIcons/Sunny';
 import Thunderstorm from './WeatherIcons/Thunderstorm';
 import Snow from './WeatherIcons/Snow';
@@ -30,26 +31,38 @@ interface ForecastCardProps {
     temperature?: number;
     location?: string;
     description?: string;
+    timezone?: string;
 }
 
-export function ForecastCard({weather, temperature = 22, location = "London", description}: ForecastCardProps) {
+export function ForecastCard({weather, temperature = 22, location = "London", description, timezone = "Europe/London"}: ForecastCardProps) {
 
     const [time,setTime] = useState('00:00');
 
     const getWeatherDescription = (weather: string) => {
         switch (weather?.toLowerCase()) {
             case "rain":
-                return "Light Rain";
+                return "Rainy";
             case "thunderstorm":
                 return "Thunderstorm";
             case "snow":
-                return "Snow Showers";
+                return "Snow";
             case "cloudy":
                 return "Cloudy";
             case "clear":
-                return "Sunny";
-            default:
+                return "Clear";
+            case "partly-cloudy":
                 return "Partly Cloudy";
+            case "mist":
+            case "fog":
+                return "Misty";
+            case "night-clear":
+                return "Clear Night";
+            case "night-rain":
+                return "Rainy Night";
+            case "night-snow":
+                return "Snowy Night";
+            default:
+                return "Fair Weather";
         }
     };
 
@@ -65,17 +78,40 @@ export function ForecastCard({weather, temperature = 22, location = "London", de
                 <div className="flex-1 flex items-center justify-center min-h-0 overflow-hidden">
                     <div className="flex items-center justify-center max-w-xs max-h-xs">
                         {(() => {
-                            switch (weather) {
+                            const locationTime = new Date().toLocaleString("en-US", {
+                                timeZone: timezone,
+                                hour12: false,
+                                hour: "2-digit"
+                            });
+                            const currentHour = parseInt(locationTime.split(':')[0]);
+                            const isNight = currentHour >= 19 || currentHour <= 6;
+                            
+                            switch (weather?.toLowerCase()) {
                                 case "rain":
-                                    return <PartlyCloudyRain />;
+                                    return isNight ? <NightRain /> : <PartlyCloudyRain />;
                                 case "thunderstorm":
                                     return <Thunderstorm />;
                                 case "snow":
-                                    return <Snow />
+                                    return isNight ? <NightSnow /> : <Snow />;
                                 case "clear":
-                                    return <Sunny/>
+                                    return isNight ? <NightClear /> : <Sunny />;
+                                case "cloudy":
+                                    return <Cloudy />;
+                                case "partly-cloudy":
+                                    return <PartlyCloudy />;
+                                case "mist":
+                                case "fog":
+                                    return <Cloudy />;
+                                case "sunny-snow":
+                                    return <SunnySnow />;
+                                case "night-clear":
+                                    return <NightClear />;
+                                case "night-rain":
+                                    return <NightRain />;
+                                case "night-snow":
+                                    return <NightSnow />;
                                 default:
-                                    return <Sunny />;
+                                    return isNight ? <NightClear /> : <Sunny />;
                             }
                         })()}
                     </div>

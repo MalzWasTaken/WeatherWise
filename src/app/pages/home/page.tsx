@@ -163,7 +163,8 @@ const HomePage = ({ user }: { user: any }) => {
     windSpeed: 12,
     visibility: 10,
     pressure: 1013,
-    description: "Partly Cloudy"
+    description: "Partly Cloudy",
+    timezone: "Europe/London"
   });
   const router = useRouter();
   const state = useGeolocation();
@@ -210,21 +211,28 @@ const fetchWeather = async (cityName: string) => {
         windSpeed: Math.round(data.current.wind_mph),
         visibility: Math.round(data.current.vis_miles),
         pressure: Math.round(data.current.pressure_mb),
-        description: data.current.condition.text
+        description: data.current.condition.text,
+        timezone: data.location.tz_id
       });
       
       
       const condition = data.current.condition.text.toLowerCase();
-      if (condition.includes('rain') || condition.includes('drizzle')) {
+      console.log("Weather condition from API:", condition);
+      
+      if (condition.includes('rain') || condition.includes('drizzle') || condition.includes('shower')) {
         setWeather('rain');
       } else if (condition.includes('thunder') || condition.includes('storm')) {
         setWeather('thunderstorm');
-      } else if (condition.includes('snow') || condition.includes('blizzard')) {
+      } else if (condition.includes('snow') || condition.includes('blizzard') || condition.includes('sleet')) {
         setWeather('snow');
       } else if (condition.includes('clear') || condition.includes('sunny')) {
         setWeather('clear');
-      } else if (condition.includes('cloudy') || condition.includes('foggy')){
+      } else if (condition.includes('partly')) {
+        setWeather('partly-cloudy');
+      } else if (condition.includes('cloud') || condition.includes('overcast')) {
         setWeather('cloudy');
+      } else if (condition.includes('mist') || condition.includes('fog') || condition.includes('haze')) {
+        setWeather('mist');
       } else {
         setWeather('clear'); // default
       }
@@ -272,6 +280,8 @@ if (data.forecast && Array.isArray(data.forecast.forecastday)) {
       case "mist":
       case "fog":
         return "from-gray-300 to-gray-500";
+      case "partly-cloudy":
+        return "from-blue-300 to-gray-300";
       default:
         return "from-blue-200 to-blue-400";
     }
@@ -301,6 +311,7 @@ if (data.forecast && Array.isArray(data.forecast.forecastday)) {
             temperature={weatherData.temperature}
             location={weatherData.location}
             description={weatherData.description}
+            timezone={weatherData.timezone}
           />
         </div>
         
@@ -309,6 +320,7 @@ if (data.forecast && Array.isArray(data.forecast.forecastday)) {
             <TemperatureCard 
               temperature={weatherData.temperature}
               location={weatherData.location}
+              timezone={weatherData.timezone}
             />
           </div>
           <div className="flex-1">
