@@ -183,8 +183,8 @@ const HomePage = ({ user }: { user: any }) => {
         minute: "2-digit",
       }).format(now);
 
-      const currentHour = parseInt(currentTime.split(":")[0], 10);
-      const nightTime = currentHour >= 19 || currentHour <= 6;
+      const currentHour = parseInt(currentTime.split(':')[0], 10);
+      const nightTime = currentHour >= 20 || currentHour <= 4;
       setIsNight(nightTime);
     };
 
