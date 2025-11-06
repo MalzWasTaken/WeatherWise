@@ -2,7 +2,7 @@
 
 import TopBar from "./top-bar";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { auth0 } from "../../../lib/auth0";
 import { useGeolocation } from "@uidotdev/usehooks";
@@ -166,13 +166,13 @@ const HomePage = ({ user }: { user: any }) => {
     visibility: 10,
     pressure: 1013,
     description: "Partly Cloudy",
-    timezone: "Europe/London"
+    timezone: "Europe/London",
   });
   const [isNight, setIsNight] = useState(false);
+  const [isLoadingWeather, setIsLoadingWeather] = useState(true);
   const router = useRouter();
   const state = useGeolocation();
 
-  
   useEffect(() => {
     const updateTimeAndNight = () => {
       const now = new Date();
@@ -183,14 +183,13 @@ const HomePage = ({ user }: { user: any }) => {
         minute: "2-digit",
       }).format(now);
 
-      const currentHour = parseInt(currentTime.split(':')[0], 10);
+      const currentHour = parseInt(currentTime.split(":")[0], 10);
       const nightTime = currentHour >= 19 || currentHour <= 6;
       setIsNight(nightTime);
     };
 
     updateTimeAndNight();
-    const interval = setInterval(updateTimeAndNight, 60000); 
-
+    const interval = setInterval(updateTimeAndNight, 60000);
     return () => clearInterval(interval);
   }, [weatherData.timezone]);
 
@@ -216,20 +215,18 @@ const HomePage = ({ user }: { user: any }) => {
   const handleSnow = () => setWeather("snow");
   const handleClear = () => setWeather("clear");
 
+  const fetchWeather = async (cityName: string) => {
+    try {
+      console.log("Fetching weather for:", cityName);
+      const res = await fetch(
+        `${backendUrl}/api/weather?city=${encodeURIComponent(cityName)}`
+      );
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : null;
+      if (!data) return;
 
-const fetchWeather = async (cityName: string) => {
-  try {
-    console.log("Fetching weather for:", cityName);
-    const res = await fetch(
-      `${backendUrl}/api/weather?city=${encodeURIComponent(cityName)}`
-    );
-    const text = await res.text();
-    const data = text ? JSON.parse(text) : null;
-    if (!data) return;
+      console.log("=== Current Weather ===");
 
-    console.log("=== Current Weather ===")
-      
-     
       setWeatherData({
         temperature: Math.round(data.current.temp_c),
         location: `${data.location.name}, ${data.location.country}`,
@@ -238,80 +235,84 @@ const fetchWeather = async (cityName: string) => {
         visibility: Math.round(data.current.vis_miles),
         pressure: Math.round(data.current.pressure_mb),
         description: data.current.condition.text,
-        timezone: data.location.tz_id
+        timezone: data.location.tz_id,
       });
-      
-      
+
       const condition = data.current.condition.text.toLowerCase();
       console.log("Weather condition from API:", condition);
-      
-      if (condition.includes('rain') || condition.includes('drizzle') || condition.includes('shower')) {
-        setWeather('rain');
-      } else if (condition.includes('thunder') || condition.includes('storm')) {
-        setWeather('thunderstorm');
-      } else if (condition.includes('snow') || condition.includes('blizzard') || condition.includes('sleet')) {
-        setWeather('snow');
-      } else if (condition.includes('clear') || condition.includes('sunny')) {
-        setWeather('clear');
-      } else if (condition.includes('partly')) {
-        setWeather('partly-cloudy');
-      } else if (condition.includes('cloud') || condition.includes('overcast')) {
-        setWeather('cloudy');
-      } else if (condition.includes('mist') || condition.includes('fog') || condition.includes('haze')) {
-        setWeather('mist');
+
+      if (
+        condition.includes("rain") ||
+        condition.includes("drizzle") ||
+        condition.includes("shower")
+      ) {
+        setWeather("rain");
+      } else if (condition.includes("thunder") || condition.includes("storm")) {
+        setWeather("thunderstorm");
+      } else if (
+        condition.includes("snow") ||
+        condition.includes("blizzard") ||
+        condition.includes("sleet")
+      ) {
+        setWeather("snow");
+      } else if (condition.includes("clear") || condition.includes("sunny")) {
+        setWeather("clear");
+      } else if (condition.includes("partly")) {
+        setWeather("partly-cloudy");
+      } else if (
+        condition.includes("cloud") ||
+        condition.includes("overcast")
+      ) {
+        setWeather("cloudy");
+      } else if (
+        condition.includes("mist") ||
+        condition.includes("fog") ||
+        condition.includes("haze")
+      ) {
+        setWeather("mist");
       } else {
-        setWeather('clear'); // default
+        setWeather("clear");
       }
-      
 
-    Object.entries(data.current).forEach(([key, value]) => {
-      console.log(key, ":", value);
-    });
-
-console.log("7 Day Forecast: ");
-if (data.forecast && Array.isArray(data.forecast.forecastday)) {
-  data.forecast.forecastday.forEach((day: any) => {
-    console.log("Date:", day.date);
-    console.log("Max Temp:", day.day.maxtemp_c, "°C");
-    console.log("Min Temp:", day.day.mintemp_c, "°C");
-    console.log("Condition:", day.day.condition.text);
-    console.log("---");
-  });
-} else {
-  console.log("No forecast data available");
-
+      console.log("7 Day Forecast:");
+      if (data.forecast && Array.isArray(data.forecast.forecastday)) {
+        data.forecast.forecastday.forEach((day: any) => {
+          console.log("Date:", day.date);
+          console.log("Max Temp:", day.day.maxtemp_c, "°C");
+          console.log("Min Temp:", day.day.mintemp_c, "°C");
+          console.log("Condition:", day.day.condition.text);
+          console.log("---");
+        });
+      } else {
+        console.log("No forecast data available");
+      }
+    } catch (err) {
+      console.error("Error occurred at fetchWeather", err);
     }
-  } catch (err) {
-    console.error("Error occurred at fetchWeather", err);
-  }
-};
+  };
 
-const [isLoadingWeather, setIsLoadingWeather] = useState(true);
-
-  
   useEffect(() => {
     const getUserLocationWeather = async () => {
       setIsLoadingWeather(true);
-      
+
       if (state.latitude && state.longitude) {
         try {
-          
           const response = await fetch(
             `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${state.latitude}&longitude=${state.longitude}&localityLanguage=en`
           );
           const locationData = await response.json();
-          const userCity = locationData.city || locationData.locality || "Houston";
-          
+          const userCity =
+            locationData.city || locationData.locality || "Houston";
+
           console.log("User's city:", userCity);
           await fetchWeather(userCity);
           setIsLoadingWeather(false);
         } catch (error) {
           console.error("Error getting user location:", error);
-          await fetchWeather("Houston"); 
+          await fetchWeather("Houston");
           setIsLoadingWeather(false);
         }
       } else if (!state.loading && state.error) {
-        
         await fetchWeather("Houston");
         setIsLoadingWeather(false);
       }
@@ -364,16 +365,14 @@ const [isLoadingWeather, setIsLoadingWeather] = useState(true);
     }
   };
 
-
-
-  //Loading screen 
+  // Loading screen
   if (isLoadingWeather) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-400 to-blue-600 flex flex-col items-center justify-center text-white">
         <div className="text-center space-y-6">
           <div className="relative">
             <div className="w-100">
-              <FakeProgress/>
+              <FakeProgress />
             </div>
           </div>
           <div className="space-y-2">
@@ -392,8 +391,8 @@ const [isLoadingWeather, setIsLoadingWeather] = useState(true);
         isNight
       )}`}
     >
-        {isNight && weather === "clear" && <StarBackground/>}
-    
+      {isNight && weather === "clear" && <StarBackground />}
+
       <div className="fixed inset-0 z-[0] pointer-events-none w-screen h-screen flex items-center justify-center">
         {weather === "rain" && <GoodRainAnimation type="rain" />}
         {weather === "thunderstorm" && (
@@ -404,11 +403,10 @@ const [isLoadingWeather, setIsLoadingWeather] = useState(true);
 
       <TopBar onCitySelect={fetchWeather} />
 
-    
       <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8 mb-8 z-[2] px-4 lg:h-[500px]">
         <div className="lg:col-span-2 h-full">
-          <ForecastCard 
-            weather={weather} 
+          <ForecastCard
+            weather={weather}
             temperature={weatherData.temperature}
             location={weatherData.location}
             description={weatherData.description}
@@ -416,10 +414,10 @@ const [isLoadingWeather, setIsLoadingWeather] = useState(true);
             isNight={isNight}
           />
         </div>
-        
+
         <div className="space-y-6 h-full flex flex-col">
           <div className="flex-1">
-            <TemperatureCard 
+            <TemperatureCard
               temperature={weatherData.temperature}
               location={weatherData.location}
               timezone={weatherData.timezone}
@@ -427,7 +425,7 @@ const [isLoadingWeather, setIsLoadingWeather] = useState(true);
             />
           </div>
           <div className="flex-1">
-            <WeatherDetailsCard 
+            <WeatherDetailsCard
               humidity={weatherData.humidity}
               windSpeed={weatherData.windSpeed}
               visibility={weatherData.visibility}
@@ -438,17 +436,6 @@ const [isLoadingWeather, setIsLoadingWeather] = useState(true);
         </div>
       </div>
 
-      {user && (
-        <div className="z-[2] bg-white/30 backdrop-blur-md p-4 rounded-xl mt-4 text-center">
-          <img
-            className="w-16 h-16 mx-auto mb-2"
-            src={user.picture}
-            alt={user.name}
-          />
-          <h2 className="font-bold text-lg">{user.name}</h2>
-          <p className="text-sm">{user.email}</p>
-        </div>
-      )}
 
       <h2 className="text-white">
         {state.loading

@@ -6,6 +6,9 @@ import dotenv from "dotenv";
 import UserRouter from "./routes/users.js";
 import WeatherRouter from "./routes/weather.js";
 import EmailRouter from "./routes/email.js"
+import AlertRouter from "./routes/alerts.js"
+
+import "./cron/alerts.js";
 
 dotenv.config({ path: path.resolve(process.cwd(), "backend", ".env") });
 
@@ -19,6 +22,7 @@ app.use(express.json());
 app.use("/api/users", UserRouter);
 app.use("/api/weather", WeatherRouter);
 app.use("/api/email", EmailRouter);
+app.use("/api/alerts", AlertRouter);
 
 app.use(express.static(path.join(__dirname, "public")));
 

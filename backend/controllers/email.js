@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendMail = async (req, res) => {
+const sendEmail = async (req, res) => {
   const { to, subject,html} = req.body;
 
   try {
@@ -40,4 +40,27 @@ const sendMail = async (req, res) => {
   }
 };
 
-export { sendMail };
+const sendCronEmail = async ({ to, subject, html, from }) => {
+  try {
+    const info = await transporter.sendMail({
+      from: from || `"WeatherWise Team" <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      html,
+      attachments: [
+        {
+          filename: "image.png",
+          path: path.join(__dirname, "../images/image.png"),
+          cid: "welcome_image",
+        },
+      ],
+    });
+
+    console.log("Email sent:", info.messageId);
+  } catch (err) {
+    console.error("Email sending failed:", err);
+  }
+};
+
+
+export { sendEmail, sendCronEmail };

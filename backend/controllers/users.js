@@ -11,7 +11,6 @@ async function getUsers(req, res) {
 }
 
 async function addUsers(req, res) {
-    // console.log(`req.body... ${JSON.stringify(req.body)}...`);
     try {
         const results = await addOneUser(req.body);
         return res.status(200).json(results);

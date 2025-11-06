@@ -4,22 +4,41 @@ const getWeather = async (req, res) => {
   try {
     const { city, lat, lon } = req.query;
     const API_KEY = process.env.WEATHER_API_KEY;
-    
-    let url;
-    if (lat && lon) {
-      url = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${lat},${lon}&days=7&alerts=yes`;
-    } else if (city) {
-      url = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${encodeURIComponent(city)}&days=7&alerts=yes`;
-    } else {
-      return res.status(400).json({ error: "Either city or lat/lon coordinates are required" });
+
+    if (!city) {
+      return res.status(400).json({ error: "City parameter is required" });
     }
+
+    // Search for the city first
+    const searchUrl = `https://api.weatherapi.com/v1/search.json?key=${API_KEY}&q=${encodeURIComponent(
+      city
+    )}`;
+    const searchRes = await fetch(searchUrl);
+    const searchData = await searchRes.json();
+
+    // Find exact match
+    const exactMatch = searchData.find(
+      (item) => item.name.toLowerCase() === city.toLowerCase()
+    );
+
+    if (!exactMatch) {
+      return res
+        .status(404)
+        .json({ error: `City '${city}' not found (possible typo?)` });
+    }
+
+    // Fetch forecast for exact city match
+    const url = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${encodeURIComponent(
+      exactMatch.name
+    )}&days=7&alerts=yes`;
 
     const response = await fetch(url);
     const data = await response.json();
+
     res.json(data);
   } catch (err) {
     console.error("Weather API error:", err);
-    res.status(500).json({ error: "Failed to fetch weather data" });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 

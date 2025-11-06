@@ -1,8 +1,9 @@
 import express from "express";
-import { sendMail } from "../controllers/email.js";
+import { sendEmail, sendCronEmail } from "../controllers/email.js";
 
 const router = express.Router();
 
-router.post("/", sendMail);
+router.post("/", sendEmail);
+router.post("/cron", sendCronEmail);
 
 export default router;
