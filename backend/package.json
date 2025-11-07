@@ -16,7 +16,10 @@
     "express": "^5.1.0",
     "express-validator": "^7.3.0",
     "knex": "^3.1.0",
+<<<<<<< Updated upstream
     "node-cron": "^4.2.1",
+=======
+>>>>>>> Stashed changes
     "node-fetch": "^3.3.2",
     "pg": "^8.16.3",
     "sqlite": "^5.1.1",
