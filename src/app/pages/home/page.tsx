@@ -7,14 +7,11 @@ import dynamic from "next/dynamic";
 import { auth0 } from "../../../lib/auth0";
 import { useGeolocation } from "@uidotdev/usehooks";
 import Toast from "typescript-toastify";
-<<<<<<< Updated upstream
 import { ForecastCard } from "./ForecastCard";
 import { TemperatureCard } from "./TemperatureCard";
 import { WeatherDetailsCard } from "./WeatherDetailsCard";
 import StarBackground from "./StarBackground";
 import { FakeProgress } from "./FakeProgress";
-=======
->>>>>>> Stashed changes
 
 const RainAnimation = dynamic(() => import("./rainAnimation"), { ssr: false });
 const GoodRainAnimation = dynamic(() => import("./GoodRainAnimation"), {
@@ -29,7 +26,6 @@ const HomePageWrapper = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      //If user is not authenticated, redirect to back to main
       try {
         if (
           window.location.search.includes("code=") ||
@@ -42,16 +38,9 @@ const HomePageWrapper = () => {
         if (!isAuthenticated) {
           await auth0.logout({
             logoutParams: { returnTo: window.location.origin },
-<<<<<<< Updated upstream
           });
         }
 
-=======
-          })
-        }
-
-        //Check if user exists in backend
->>>>>>> Stashed changes
         const userProfile = await auth0.getUser();
         setUser(userProfile);
 
@@ -63,20 +52,11 @@ const HomePageWrapper = () => {
           );
 
           let existingUser = null;
-<<<<<<< Updated upstream
-=======
-
-          // Check if https response is within range
->>>>>>> Stashed changes
           if (response.ok) {
             const text = await response.text();
             existingUser = text ? JSON.parse(text) : null;
           }
 
-<<<<<<< Updated upstream
-=======
-          // If user exists, update user details and redirect to dashboard
->>>>>>> Stashed changes
           if (existingUser) {
             console.log("Existing user found:", existingUser);
             const updateResponse = await fetch(
@@ -97,20 +77,12 @@ const HomePageWrapper = () => {
                 }),
               }
             );
-<<<<<<< Updated upstream
 
-=======
->>>>>>> Stashed changes
             if (updateResponse.ok) {
               await updateResponse.json();
               router.replace("/pages/home");
 
-<<<<<<< Updated upstream
               new Toast({
-=======
-              //Toast popup - Existing User
-              const toast = new Toast({
->>>>>>> Stashed changes
                 toastMsg: "Welcome back, " + userProfile.nickname,
                 autoCloseTime: 3000,
                 theme: "dark",
@@ -120,10 +92,6 @@ const HomePageWrapper = () => {
             return;
           }
 
-<<<<<<< Updated upstream
-=======
-          //If user does not exist, create new user in backend
->>>>>>> Stashed changes
           console.log("No existing user, creating new user.");
 
           const createResponse = await fetch(`${backendUrl}/api/users/add`, {
@@ -138,31 +106,18 @@ const HomePageWrapper = () => {
             }),
           });
 
-<<<<<<< Updated upstream
-=======
-          //Then redirect to dashboard
->>>>>>> Stashed changes
           if (createResponse.ok) {
             await createResponse.json();
             router.replace("/pages/home");
             console.log("New user created successfully.");
 
-<<<<<<< Updated upstream
             new Toast({
-=======
-            //Toast popup - new user
-            const toast = new Toast({
->>>>>>> Stashed changes
               toastMsg: "Welcome, " + userProfile.nickname,
               autoCloseTime: 3000,
               theme: "dark",
               type: "success",
             });
 
-<<<<<<< Updated upstream
-=======
-            //Send a welcome message to user via backend email
->>>>>>> Stashed changes
             const email = await fetch(`${backendUrl}/api/email`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -175,7 +130,6 @@ const HomePageWrapper = () => {
                 image: "../images/image.png",
               }),
             });
-<<<<<<< Updated upstream
             const data = await email.json();
             console.log(data);
           }
@@ -186,26 +140,6 @@ const HomePageWrapper = () => {
 
         setTimeout(() => {
           new Toast({
-=======
-            if (email.ok) {
-              const data = await email.json();
-              console.log(data);
-            } else {
-              const data = await email.json();
-              console.log(data);
-            }
-          }
-        }
-        //catch any errors and redirect to main
-      } catch (err) {
-        console.log("Error in Authenticaton", err);
-
-        router.replace("/");
-
-        //Toast popup - Error
-        setTimeout(() => {
-          const toast = new Toast({
->>>>>>> Stashed changes
             toastMsg: "Error Occurred - Please Try Again",
             autoCloseTime: 3000,
             theme: "dark",
@@ -238,7 +172,6 @@ const HomePage = ({ user }: { user: any }) => {
   const [isLoadingWeather, setIsLoadingWeather] = useState(true);
   const router = useRouter();
   const state = useGeolocation();
-<<<<<<< Updated upstream
 
   useEffect(() => {
     const updateTimeAndNight = () => {
@@ -282,32 +215,6 @@ const HomePage = ({ user }: { user: any }) => {
   const handleSnow = () => setWeather("snow");
   const handleClear = () => setWeather("clear");
 
-=======
-  const [location, setLocation] = useState();
-
-  let currentToast = 0;
-  let maxToast = 1;
-
-  //Creates toast popup when click
-  const handleClick = () => {
-    if (currentToast >= maxToast) {
-      return;
-    }
-    const toast = new Toast({
-      toastMsg: "Hello World",
-      autoCloseTime: 3000,
-      theme: "dark",
-      type: "error",
-      onClose: () => {
-        currentToast--;
-      },
-    });
-    currentToast++;
-    console.log(currentToast);
-  };
-
-  //Fetches weather via backend
->>>>>>> Stashed changes
   const fetchWeather = async (cityName: string) => {
     try {
       console.log("Fetching weather for:", cityName);
@@ -315,7 +222,6 @@ const HomePage = ({ user }: { user: any }) => {
         `${backendUrl}/api/weather?city=${encodeURIComponent(cityName)}`
       );
       const text = await res.text();
-<<<<<<< Updated upstream
       const data = text ? JSON.parse(text) : null;
       if (!data) return;
 
@@ -382,40 +288,6 @@ const HomePage = ({ user }: { user: any }) => {
       }
     } catch (err) {
       console.error("Error occurred at fetchWeather", err);
-=======
-      console.log("Data in text:");
-      const data = text ? JSON.parse(text) : null;
-      if (!data) return;
-      Object.entries(data.current).forEach(([key, value]) => {
-        console.log(key, ":", value);
-      });
-    } catch (err) {
-      console.error("Error occured at fetchWeather", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchWeather("London");
-  }, []);
-
-  const getBackground = (weather: string) => {
-    switch (weather?.toLowerCase()) {
-      case "clear":
-        return "from-sky-300 to-yellow-200";
-      case "rain":
-        return "from-gray-700 to-gray-800";
-      case "cloudy":
-        return "from-gray-200 to-gray-400";
-      case "snow":
-        return "from-gray-400 to-gray-400";
-      case "thunderstorm":
-        return "from-gray-800 to-gray-900";
-      case "mist":
-      case "fog":
-        return "from-gray-300 to-gray-500";
-      default:
-        return "from-blue-200 to-blue-400";
->>>>>>> Stashed changes
     }
   };
 
@@ -586,35 +458,11 @@ const HomePage = ({ user }: { user: any }) => {
         Sunny
       </button>
 
-      {user && (
-        <div className="z-[2] bg-white/30 backdrop-blur-md p-4 rounded-xl mt-4 text-center">
-          <img
-            className="w-16 h-16 mx-auto mb-2"
-            src={user.picture}
-            alt={user.name}
-          />
-          <h2 className="font-bold text-lg">{user.name}</h2>
-          <p className="text-sm">{user.email}</p>
-        </div>
-      )}
-
-      <h2 className="text-white">
-        {state.loading
-          ? "Getting location..."
-          : state.latitude && state.longitude
-          ? `Latitude: ${state.latitude} Longitude: ${state.longitude}`
-          : "Location unavailable - Enable Location Again"}
-      </h2>
-
-      <button className="bg-blue-50" onClick={handleClick}>
-        Click Me
-      </button>
-
       <button
         className={`${
           weather === "snow" ? "bg-green-400 hover:bg-green-300" : "bg-black"
         } text-white font-bold py-2 px-6 rounded mb-6 mt-6 z-[2]`}
-        onClick={() => setWeather("snow")}
+        onClick={handleSnow}
       >
         Snowy Weather
       </button>
@@ -623,7 +471,7 @@ const HomePage = ({ user }: { user: any }) => {
         className={`${
           weather === "rain" ? "bg-green-400 hover:bg-green-300" : "bg-black"
         } text-white font-bold py-2 px-6 rounded mb-6 mt-6 z-[2]`}
-        onClick={() => setWeather("rain")}
+        onClick={handleRain}
       >
         Rainy Weather
       </button>
@@ -634,7 +482,7 @@ const HomePage = ({ user }: { user: any }) => {
             ? "bg-green-400 hover:bg-green-300"
             : "bg-black"
         } text-white font-bold py-2 px-6 rounded mb-6 mt-6 z-[2]`}
-        onClick={() => setWeather("thunderstorm")}
+        onClick={handleThunder}
       >
         Thundery Weather
       </button>

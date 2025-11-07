@@ -6,12 +6,9 @@ import dotenv from "dotenv";
 import UserRouter from "./routes/users.js";
 import WeatherRouter from "./routes/weather.js";
 import EmailRouter from "./routes/email.js"
-<<<<<<< Updated upstream
 import AlertRouter from "./routes/alerts.js"
 
 import "./cron/alerts.js";
-=======
->>>>>>> Stashed changes
 
 dotenv.config({ path: path.resolve(process.cwd(), "backend", ".env") });
 
@@ -25,10 +22,7 @@ app.use(express.json());
 app.use("/api/users", UserRouter);
 app.use("/api/weather", WeatherRouter);
 app.use("/api/email", EmailRouter);
-<<<<<<< Updated upstream
 app.use("/api/alerts", AlertRouter);
-=======
->>>>>>> Stashed changes
 
 app.use(express.static(path.join(__dirname, "public")));
 

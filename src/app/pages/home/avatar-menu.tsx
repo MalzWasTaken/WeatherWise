@@ -36,7 +36,6 @@ const handleLogout = async () => {
   }
 };
 
-<<<<<<< Updated upstream
   const goToAlerts = async () => {
   router.replace("./Alerts")
   }
@@ -44,8 +43,6 @@ const handleLogout = async () => {
   const goToHome = async () => {
     router.replace("./home")
   }
-=======
->>>>>>> Stashed changes
 
 
   return (
@@ -66,12 +63,8 @@ const handleLogout = async () => {
         <DropdownMenuContent>
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
-<<<<<<< Updated upstream
           <DropdownMenuItem onClick={goToHome}>Home</DropdownMenuItem>
           <DropdownMenuItem onClick={goToAlerts}>Alerts</DropdownMenuItem>
-=======
-          <DropdownMenuItem>Profile</DropdownMenuItem>
->>>>>>> Stashed changes
           <DropdownMenuItem onClick={handleLogout}>Log Out</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

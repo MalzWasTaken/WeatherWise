@@ -16,11 +16,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-<<<<<<< Updated upstream
 const sendEmail = async (req, res) => {
-=======
-const sendMail = async (req, res) => {
->>>>>>> Stashed changes
   const { to, subject,html} = req.body;
 
   try {
@@ -44,7 +40,6 @@ const sendMail = async (req, res) => {
   }
 };
 
-<<<<<<< Updated upstream
 const sendCronEmail = async ({ to, subject, html, from }) => {
   try {
     const info = await transporter.sendMail({
@@ -69,6 +64,3 @@ const sendCronEmail = async ({ to, subject, html, from }) => {
 
 
 export { sendEmail, sendCronEmail };
-=======
-export { sendMail };
->>>>>>> Stashed changes
