@@ -154,6 +154,7 @@ const HomePageWrapper = () => {
 
   if (!user) return null;
   return <HomePage user={user} />;
+
 };
 
 const HomePage = ({ user }: { user: any }) => {
@@ -486,6 +487,7 @@ const HomePage = ({ user }: { user: any }) => {
       >
         Thundery Weather
       </button>
+
 
       <button
         className="bg-black text-white font-bold py-2 px-6 rounded mb-6 mt-6 z-[2]"
