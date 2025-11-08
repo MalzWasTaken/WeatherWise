@@ -22,14 +22,18 @@ const getWeather = async (req, res) => {
         .json({ error: `City '${city}' not found (possible typo?)` });
     }
 
-    // Find an exact match by name (case-insensitive)
     const exactMatch = searchData.find(
       (item) => item.name.toLowerCase() === city.toLowerCase()
     );
 
-    const matchedCity = exactMatch || searchData[0]; // fallback to first if no exact match
+    if (!exactMatch) {
+      return res
+        .status(404)
+        .json({ error: `City '${city}' not found (exact match required)` });
+    }
 
-    // Fetch forecast for that city
+    const matchedCity = exactMatch;
+
     const forecastUrl = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${encodeURIComponent(
       matchedCity.name
     )}&days=7&alerts=yes`;

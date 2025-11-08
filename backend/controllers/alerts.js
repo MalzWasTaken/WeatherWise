@@ -1,4 +1,4 @@
-import { getAlertsByEmail, addWeatherAlert } from "../models/alerts.js";
+import { getAlertsByEmail, addWeatherAlert,deleteWeatherAlert } from "../models/alerts.js";
 
 async function getAlerts(req, res) {
   try {
@@ -21,5 +21,14 @@ async function addAlerts(req, res) {
   }
 }
 
+async function deleteAlerts(req, res) {
+  try {
+    await deleteWeatherAlert(req.params.id);
+    return res.status(204).send();
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+}
 
-export {getAlerts,addAlerts}
+export {getAlerts,addAlerts,deleteAlerts}
