@@ -67,7 +67,6 @@ export function ForecastCard({weather, temperature = 22, location = "London", de
         }
     };
 
-    console.log(weather)
     return (
         <Card className="w-full h-full bg-white/20 backdrop-blur-md border-white/30 hover:scale-102 animate-in fade-in md:slide-in-from-bottom-12 md:duration-600 duration-700 cursor-pointer transition-all ease-in-out overflow-hidden">
             <CardContent className="p-8 h-full flex flex-col justify-between overflow-hidden">

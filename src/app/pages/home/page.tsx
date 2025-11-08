@@ -2,7 +2,7 @@
 
 import TopBar from "./top-bar";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { auth0 } from "../../../lib/auth0";
 import { useGeolocation } from "@uidotdev/usehooks";
@@ -12,6 +12,8 @@ import { TemperatureCard } from "./TemperatureCard";
 import { WeatherDetailsCard } from "./WeatherDetailsCard";
 import StarBackground from "./StarBackground";
 import { FakeProgress } from "./FakeProgress";
+import { UserCard} from "./UserCard";
+import { AlertCard } from "./AlertCard";
 
 const RainAnimation = dynamic(() => import("./rainAnimation"), { ssr: false });
 const GoodRainAnimation = dynamic(() => import("./GoodRainAnimation"), {
@@ -50,7 +52,6 @@ const HomePageWrapper = () => {
               userProfile.email
             )}`
           );
-
           let existingUser = null;
           if (response.ok) {
             const text = await response.text();
@@ -59,7 +60,7 @@ const HomePageWrapper = () => {
 
           if (existingUser) {
             console.log("Existing user found:", existingUser);
-            const updateResponse = await fetch(
+            await fetch(
               `${backendUrl}/api/users/update/${encodeURIComponent(
                 existingUser.id
               )}`,
@@ -77,24 +78,18 @@ const HomePageWrapper = () => {
                 }),
               }
             );
-
-            if (updateResponse.ok) {
-              await updateResponse.json();
-              router.replace("/pages/home");
-
-              new Toast({
-                toastMsg: "Welcome back, " + userProfile.nickname,
-                autoCloseTime: 3000,
-                theme: "dark",
-                type: "success",
-              });
-            }
+            router.replace("/pages/home");
+            new Toast({
+              toastMsg: "Welcome back, " + userProfile.nickname,
+              autoCloseTime: 3000,
+              theme: "dark",
+              type: "success",
+            });
             return;
           }
 
           console.log("No existing user, creating new user.");
-
-          const createResponse = await fetch(`${backendUrl}/api/users/add`, {
+          await fetch(`${backendUrl}/api/users/add`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -105,39 +100,17 @@ const HomePageWrapper = () => {
               email_verified: userProfile.email_verified,
             }),
           });
-
-          if (createResponse.ok) {
-            await createResponse.json();
-            router.replace("/pages/home");
-            console.log("New user created successfully.");
-
-            new Toast({
-              toastMsg: "Welcome, " + userProfile.nickname,
-              autoCloseTime: 3000,
-              theme: "dark",
-              type: "success",
-            });
-
-            const email = await fetch(`${backendUrl}/api/email`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                to: userProfile.email,
-                subject: "Welcome to WeatherWise!",
-                html: `<p>Hi ${userProfile.nickname}, welcome to WeatherWise!</p> 
-                <img src="cid:welcome_image"/>
-                <a href="http://localhost:3000" style=color:blue>Get Your Weather Now!</a>`,
-                image: "../images/image.png",
-              }),
-            });
-            const data = await email.json();
-            console.log(data);
-          }
+          router.replace("/pages/home");
+          new Toast({
+            toastMsg: "Welcome, " + userProfile.nickname,
+            autoCloseTime: 3000,
+            theme: "dark",
+            type: "success",
+          });
         }
       } catch (err) {
         console.log("Error in Authentication", err);
         router.replace("/");
-
         setTimeout(() => {
           new Toast({
             toastMsg: "Error Occurred - Please Try Again",
@@ -148,29 +121,31 @@ const HomePageWrapper = () => {
         }, 500);
       }
     };
-
     checkAuth();
   }, [router]);
 
   if (!user) return null;
   return <HomePage user={user} />;
-
 };
 
 const HomePage = ({ user }: { user: any }) => {
   const [weather, setWeather] = useState("thunderstorm");
+  const [userAlerts, setUserAlerts] = useState<any[]>([]);
+  const [weatherAlerts, setWeatherAlerts] = useState<any[]>([]);
+  const [forecastData, setForecastData] = useState<any[]>([]);
   const [weatherData, setWeatherData] = useState({
-    temperature: 22,
-    location: "London",
-    humidity: 65,
-    windSpeed: 12,
-    visibility: 10,
-    pressure: 1013,
-    description: "Partly Cloudy",
+    temperature: 0,
+    location: "",
+    humidity: 0,
+    windSpeed: 0,
+    visibility: 0,
+    pressure: 0,
+    description: "",
     timezone: "Europe/London",
   });
   const [isNight, setIsNight] = useState(false);
   const [isLoadingWeather, setIsLoadingWeather] = useState(true);
+
   const router = useRouter();
   const state = useGeolocation();
 
@@ -183,33 +158,14 @@ const HomePage = ({ user }: { user: any }) => {
         hour: "2-digit",
         minute: "2-digit",
       }).format(now);
-
-      const currentHour = parseInt(currentTime.split(':')[0], 10);
+      const currentHour = parseInt(currentTime.split(":")[0], 10);
       const nightTime = currentHour >= 20 || currentHour <= 4;
       setIsNight(nightTime);
     };
-
     updateTimeAndNight();
     const interval = setInterval(updateTimeAndNight, 60000);
     return () => clearInterval(interval);
   }, [weatherData.timezone]);
-
-  let currentToast = 0;
-  const maxToast = 1;
-
-  const handleClick = () => {
-    if (currentToast >= maxToast) return;
-    new Toast({
-      toastMsg: "Hello World",
-      autoCloseTime: 3000,
-      theme: "dark",
-      type: "error",
-      onClose: () => {
-        currentToast--;
-      },
-    });
-    currentToast++;
-  };
 
   const handleRain = () => setWeather("rain");
   const handleThunder = () => setWeather("thunderstorm");
@@ -218,15 +174,12 @@ const HomePage = ({ user }: { user: any }) => {
 
   const fetchWeather = async (cityName: string) => {
     try {
-      console.log("Fetching weather for:", cityName);
       const res = await fetch(
         `${backendUrl}/api/weather?city=${encodeURIComponent(cityName)}`
       );
       const text = await res.text();
       const data = text ? JSON.parse(text) : null;
       if (!data) return;
-
-      console.log("=== Current Weather ===");
 
       setWeatherData({
         temperature: Math.round(data.current.temp_c),
@@ -240,62 +193,55 @@ const HomePage = ({ user }: { user: any }) => {
       });
 
       const condition = data.current.condition.text.toLowerCase();
-      console.log("Weather condition from API:", condition);
-
       if (
         condition.includes("rain") ||
         condition.includes("drizzle") ||
         condition.includes("shower")
-      ) {
+      )
         setWeather("rain");
-      } else if (condition.includes("thunder") || condition.includes("storm")) {
+      else if (condition.includes("thunder") || condition.includes("storm"))
         setWeather("thunderstorm");
-      } else if (
+      else if (
         condition.includes("snow") ||
         condition.includes("blizzard") ||
         condition.includes("sleet")
-      ) {
+      )
         setWeather("snow");
-      } else if (condition.includes("clear") || condition.includes("sunny")) {
+      else if (condition.includes("clear") || condition.includes("sunny"))
         setWeather("clear");
-      } else if (condition.includes("partly")) {
-        setWeather("partly-cloudy");
-      } else if (
-        condition.includes("cloud") ||
-        condition.includes("overcast")
-      ) {
+      else if (condition.includes("partly")) setWeather("partly-cloudy");
+      else if (condition.includes("cloud") || condition.includes("overcast"))
         setWeather("cloudy");
-      } else if (
+      else if (
         condition.includes("mist") ||
         condition.includes("fog") ||
         condition.includes("haze")
-      ) {
+      )
         setWeather("mist");
-      } else {
-        setWeather("clear");
-      }
+      else setWeather("clear");
 
-      console.log("7 Day Forecast:");
+      // Map forecast for UserCard
       if (data.forecast && Array.isArray(data.forecast.forecastday)) {
-        data.forecast.forecastday.forEach((day: any) => {
-          console.log("Date:", day.date);
-          console.log("Max Temp:", day.day.maxtemp_c, "°C");
-          console.log("Min Temp:", day.day.mintemp_c, "°C");
-          console.log("Condition:", day.day.condition.text);
-          console.log("---");
-        });
-      } else {
-        console.log("No forecast data available");
+        const mappedForecast: any[] = data.forecast.forecastday.map(
+          (day: any) => ({
+            day: new Date(day.date).toLocaleDateString("en-US", {
+              weekday: "short",
+            }),
+            condition: day.day.condition.text,
+            maxTemp: Math.round(day.day.maxtemp_c) + "°C",
+            minTemp: Math.round(day.day.mintemp_c) + "°C",
+          })
+        );
+        setForecastData(mappedForecast);
       }
     } catch (err) {
-      console.error("Error occurred at fetchWeather", err);
+      console.error("Error fetching weather:", err);
     }
   };
 
   useEffect(() => {
     const getUserLocationWeather = async () => {
       setIsLoadingWeather(true);
-
       if (state.latitude && state.longitude) {
         try {
           const response = await fetch(
@@ -304,23 +250,36 @@ const HomePage = ({ user }: { user: any }) => {
           const locationData = await response.json();
           const userCity =
             locationData.city || locationData.locality || "Houston";
-
-          console.log("User's city:", userCity);
           await fetchWeather(userCity);
-          setIsLoadingWeather(false);
-        } catch (error) {
-          console.error("Error getting user location:", error);
-          await fetchWeather("Houston");
-          setIsLoadingWeather(false);
+        } catch (err) {
+          console.error("Error getting location:", err);
         }
-      } else if (!state.loading && state.error) {
-        await fetchWeather("Houston");
-        setIsLoadingWeather(false);
       }
+      setIsLoadingWeather(false);
     };
-
     getUserLocationWeather();
   }, [state.latitude, state.longitude, state.loading, state.error]);
+
+  const getUserAlerts = async () => {
+    try {
+      const res = await fetch(
+        `${backendUrl}/api/alerts/email/${encodeURIComponent(user.email)}`
+      );
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : [];
+      const formattedAlerts = data.map((alert: any) => ({
+        title: `${alert.city}`,
+        description: `Condition: ${alert.weather_type}`,
+      }));
+      setUserAlerts(formattedAlerts);
+    } catch (err) {
+      console.error("Error fetching alerts:", err);
+    }
+  };
+
+  useEffect(() => {
+    getUserAlerts();
+  }, [weatherData.location]);
 
   const getBackground = (weather: string, isNight: boolean) => {
     if (isNight) {
@@ -366,15 +325,12 @@ const HomePage = ({ user }: { user: any }) => {
     }
   };
 
-  // Loading screen
   if (isLoadingWeather) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-400 to-blue-600 flex flex-col items-center justify-center text-white">
         <div className="text-center space-y-6">
-          <div className="relative">
-            <div className="w-100">
-              <FakeProgress />
-            </div>
+          <div className="relative w-100">
+            <FakeProgress />
           </div>
           <div className="space-y-2">
             <h2 className="text-2xl font-bold">Finding your location...</h2>
@@ -393,7 +349,6 @@ const HomePage = ({ user }: { user: any }) => {
       )}`}
     >
       {isNight && weather === "clear" && <StarBackground />}
-
       <div className="fixed inset-0 z-[0] pointer-events-none w-screen h-screen flex items-center justify-center">
         {weather === "rain" && <GoodRainAnimation type="rain" />}
         {weather === "thunderstorm" && (
@@ -404,8 +359,13 @@ const HomePage = ({ user }: { user: any }) => {
 
       <TopBar onCitySelect={fetchWeather} />
 
-      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8 mb-8 z-[2] px-4 lg:h-[500px]">
-        <div className="lg:col-span-2 h-full">
+      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8 mb-8 z-[2] px-4">
+        <div className="col-span-1 lg:col-span-3 w-full">
+          <UserCard user={user} alerts={userAlerts} forecast={forecastData} />
+        </div>
+
+        {/* ForecastCard left */}
+        <div className="lg:col-span-2 w-full">
           <ForecastCard
             weather={weather}
             temperature={weatherData.temperature}
@@ -416,85 +376,74 @@ const HomePage = ({ user }: { user: any }) => {
           />
         </div>
 
-        <div className="space-y-6 h-full flex flex-col">
-          <div className="flex-1">
-            <TemperatureCard
-              temperature={weatherData.temperature}
-              location={weatherData.location}
-              timezone={weatherData.timezone}
-              isNight={isNight}
-            />
-          </div>
-          <div className="flex-1">
-            <WeatherDetailsCard
-              humidity={weatherData.humidity}
-              windSpeed={weatherData.windSpeed}
-              visibility={weatherData.visibility}
-              pressure={weatherData.pressure}
-              isNight={isNight}
-            />
-          </div>
+        {/* Right column */}
+        <div className="space-y-6 flex flex-col">
+          <TemperatureCard
+            temperature={weatherData.temperature}
+            location={weatherData.location}
+            timezone={weatherData.timezone}
+            isNight={isNight}
+          />
+          <WeatherDetailsCard
+            humidity={weatherData.humidity}
+            windSpeed={weatherData.windSpeed}
+            visibility={weatherData.visibility}
+            pressure={weatherData.pressure}
+            isNight={isNight}
+          />
+        </div>
+
+        <div className="col-span-1 lg:col-span-3 w-full">
+          <AlertCard
+            alerts={weatherAlerts}
+            selectedCity={weatherData.location}
+          />
         </div>
       </div>
 
-
-      <h2 className="text-white">
-        {state.loading
-          ? "Getting location..."
-          : state.latitude && state.longitude
-          ? `Latitude: ${state.latitude} Longitude: ${state.longitude}`
-          : "Location unavailable - Enable Location Again"}
-      </h2>
-
-      <button className="bg-blue-50" onClick={handleClick}>
-        Click Me
-      </button>
-
-      <button
-        className={`${
-          weather === "clear" ? "bg-green-400 hover:bg-green-300" : "bg-black"
-        } text-white font-bold py-2 px-6 rounded mb-6 mt-6 z-[2]`}
-        onClick={handleClear}
-      >
-        Sunny
-      </button>
-
-      <button
-        className={`${
-          weather === "snow" ? "bg-green-400 hover:bg-green-300" : "bg-black"
-        } text-white font-bold py-2 px-6 rounded mb-6 mt-6 z-[2]`}
-        onClick={handleSnow}
-      >
-        Snowy Weather
-      </button>
-
-      <button
-        className={`${
-          weather === "rain" ? "bg-green-400 hover:bg-green-300" : "bg-black"
-        } text-white font-bold py-2 px-6 rounded mb-6 mt-6 z-[2]`}
-        onClick={handleRain}
-      >
-        Rainy Weather
-      </button>
-
-      <button
-        className={`${
-          weather === "thunderstorm"
-            ? "bg-green-400 hover:bg-green-300"
-            : "bg-black"
-        } text-white font-bold py-2 px-6 rounded mb-6 mt-6 z-[2]`}
-        onClick={handleThunder}
-      >
-        Thundery Weather
-      </button>
-
-
-      <button
-        className="bg-black text-white font-bold py-2 px-6 rounded mb-6 mt-6 z-[2]"
-        onClick={() => router.push("/")}
-      >
-        Back to main page
-      </button>
+      {/* Weather buttons */}
+      <div className="flex flex-wrap justify-center gap-4 mb-6">
+        <button
+          className={`${
+            weather === "clear" ? "bg-green-400 hover:bg-green-300" : "bg-black"
+          } text-white font-bold py-2 px-6 rounded`}
+          onClick={handleClear}
+        >
+          Sunny
+        </button>
+        <button
+          className={`${
+            weather === "snow" ? "bg-green-400 hover:bg-green-300" : "bg-black"
+          } text-white font-bold py-2 px-6 rounded`}
+          onClick={handleSnow}
+        >
+          Snowy Weather
+        </button>
+        <button
+          className={`${
+            weather === "rain" ? "bg-green-400 hover:bg-green-300" : "bg-black"
+          } text-white font-bold py-2 px-6 rounded`}
+          onClick={handleRain}
+        >
+          Rainy Weather
+        </button>
+        <button
+          className={`${
+            weather === "thunderstorm"
+              ? "bg-green-400 hover:bg-green-300"
+              : "bg-black"
+          } text-white font-bold py-2 px-6 rounded`}
+          onClick={handleThunder}
+        >
+          Thundery Weather
+        </button>
+        <button
+          className="bg-black text-white font-bold py-2 px-6 rounded"
+          onClick={() => router.push("/")}
+        >
+          Back to main page
+        </button>
+      </div>
     </div>
   );
 };

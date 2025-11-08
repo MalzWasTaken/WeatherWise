@@ -35,21 +35,6 @@ export default function Home() {
     }, 2000);
   };
 
-  const getWeather = () => {
-    setLoading(true);
-    setError("");
-    setWeather(null);
-    setTimeout(() => {
-      setWeather({
-        city: "London",
-        temperature: 18,
-        description: "Partly cloudy",
-        icon: "🌤️",
-      });
-      setLoading(false);
-    }, 1000);
-  };
-
   //Display toast when logging out
   useEffect(() => {
     const loggedOut = localStorage.getItem("loggedOut");
@@ -65,8 +50,11 @@ export default function Home() {
     }
   });
 
-  return (
-    <div className="min-h-screen bg-blue-50 flex flex-col items-center justify-center p-8 relative overflow-hidden">
+return (
+  <>
+    <div className="fixed inset-0 bg-[url('./images/images.jpg')] bg-no-repeat bg-cover bg-center -z-10"></div>
+
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 relative overflow-hidden">
       {flashStage === "white" && (
         <div
           className="fixed inset-0 z-50 bg-white pointer-events-none transition-opacity duration-300"
@@ -88,28 +76,18 @@ export default function Home() {
               height: "auto",
               opacity: imageOpacity,
               transition: "opacity 0.7s",
-              borderRadius: 0,
-              boxShadow: "none",
             }}
           />
         </div>
       )}
-      <h1 className="text-5xl font-bold text-gray-900 mb-6 text-center">
-        WeatherWise
+
+      <h1 className="text-5xl mt-20 font-bold text-white mb-6 text-center">
+        WeatherWise ⛅
       </h1>
-      <p className="text-gray-700 text-center mb-8 max-w-md">
+      <p className="text-gray-700 font-bold text-center mb-8 max-w-md">
         Your intuitive weather companion. Get real-time updates and forecasts
         wherever you are.
       </p>
-
-      <button
-        onClick={getWeather}
-        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded mb-6"
-      >
-        {loading ? "Loading..." : "Get Weather"}
-      </button>
-
-      {error && <p className="text-red-500 mb-4">{error}</p>}
 
       {weather && (
         <div className="bg-white p-6 rounded shadow-md text-center">
@@ -128,16 +106,11 @@ export default function Home() {
       </button>
       <button
         onClick={goToRegister}
-        className="bg-yellow-500 hover:bg-yellow-300 text-black font-bold py-2 px-6 rounded mb-6"
+        className="bg-yellow-500 hover:bg-yellow-300 text-white font-bold py-2 px-6 rounded mb-6"
       >
         Register
       </button>
-      <button
-        onClick={goToDashboard}
-        className="bg-green-500 hover:opacity-75 text-black font-bold py-2 px-6 rounded mb-6"
-      >
-        Dashboard
-      </button>
+
       <button
         onClick={handleFlashbang}
         className="bg-black hover:opacity-75 text-white font-bold py-2 px-6 rounded mb-6"
@@ -145,5 +118,7 @@ export default function Home() {
         Flashbang
       </button>
     </div>
-  );
-}
+  </>
+);
+};
+

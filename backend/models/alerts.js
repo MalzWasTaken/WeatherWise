@@ -3,7 +3,7 @@ import db from "../db/db.js";
 // Get all weather alerts for a specific email
 const getAlertsByEmail = async (email) => {
   const results = await db("alerts")
-    .select("city","weather_type")
+    .select("city","weather_type","date_to_send")
     .from("alerts")
     .where({email})
     .orderBy([{ column: "id", order: "asc" }]);
