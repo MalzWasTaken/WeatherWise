@@ -2,11 +2,6 @@
 
 import { UserAvatar } from "../../../components/ui/avatar";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "../../../components/ui/tooltip";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -48,17 +43,9 @@ const handleLogout = async () => {
   return (
     <div>
       <DropdownMenu>
-        <Tooltip>
-          <TooltipTrigger>
             <DropdownMenuTrigger>
               <UserAvatar />
             </DropdownMenuTrigger>
-          </TooltipTrigger>
-
-          <TooltipContent>
-            <p>Options</p>
-          </TooltipContent>
-        </Tooltip>
 
         <DropdownMenuContent>
           <DropdownMenuLabel>My Account</DropdownMenuLabel>

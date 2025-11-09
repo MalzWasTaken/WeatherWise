@@ -29,13 +29,14 @@ import Cloudy from './WeatherIcons/Cloudy';
 interface ForecastCardProps {
     weather: string;
     temperature?: number;
+    feelsLike?: number;
     location?: string;
     description?: string;
     timezone?: string;
     isNight?: boolean;
 }
 
-export function ForecastCard({weather, temperature = 22, location = "London", description, timezone = "Europe/London", isNight = false}: ForecastCardProps) {
+export function ForecastCard({weather, temperature = 22, feelsLike, location = "London", description, timezone = "Europe/London", isNight = false}: ForecastCardProps) {
 
     const [time,setTime] = useState('00:00');
 
@@ -113,7 +114,7 @@ export function ForecastCard({weather, temperature = 22, location = "London", de
                     <div className="text-6xl font-bold text-white mb-2">
                         {temperature}°
                     </div>
-                    <p className="text-white/70 text-sm">Feels like {temperature + 2}°</p>
+                    <p className="text-white/70 text-sm">Feels like {feelsLike !== undefined ? feelsLike : temperature + 2}°</p>
                 </div>
             </CardContent>
         </Card>

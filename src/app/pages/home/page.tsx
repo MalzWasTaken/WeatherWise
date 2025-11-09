@@ -140,6 +140,10 @@ const HomePage = ({ user }: { user: any }) => {
     windSpeed: 0,
     visibility: 0,
     pressure: 0,
+    precipitation: 0,
+    feelsLike: 0,
+    sunrise: "06:00 AM",
+    sunset: "08:00 PM",
     description: "",
     timezone: "Europe/London",
   });
@@ -174,12 +178,82 @@ const HomePage = ({ user }: { user: any }) => {
 
   const fetchWeather = async (cityName: string) => {
     try {
+      // Extract just the city name if it includes country (e.g., "London, United Kingdom" -> "London")
+      const cityOnly = cityName.split(',')[0].trim();
+
       const res = await fetch(
-        `${backendUrl}/api/weather?city=${encodeURIComponent(cityName)}`
+        `${backendUrl}/api/weather?city=${encodeURIComponent(cityOnly)}`
       );
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: errorText || "Failed to fetch weather" };
+        }
+        console.error("Weather API error:", errorData);
+        new Toast({
+          toastMsg: `Failed to fetch weather for ${cityOnly}. Please try again.`,
+          autoCloseTime: 4000,
+          theme: "dark",
+          type: "error",
+        });
+        return;
+      }
+
       const text = await res.text();
-      const data = text ? JSON.parse(text) : null;
-      if (!data) return;
+      if (!text) {
+        console.error("Empty response from weather API");
+        return;
+      }
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.error("Error parsing weather data:", parseError);
+        new Toast({
+          toastMsg: "Error processing weather data. Please try again.",
+          autoCloseTime: 4000,
+          theme: "dark",
+          type: "error",
+        });
+        return;
+      }
+
+      // Check if response is an error or missing required data
+      if (!data || data.error) {
+        console.error("Weather API returned error:", data?.error);
+        new Toast({
+          toastMsg: data?.error?.message || data?.error || "Weather data not available.",
+          autoCloseTime: 4000,
+          theme: "dark",
+          type: "error",
+        });
+        return;
+      }
+
+      // Validate that required data structure exists
+      if (!data.current || !data.location) {
+        console.error("Invalid weather data structure:", data);
+        new Toast({
+          toastMsg: "Invalid weather data received. Please try again.",
+          autoCloseTime: 4000,
+          theme: "dark",
+          type: "error",
+        });
+        return;
+      }
+
+      // Extract sunrise and sunset from forecast data
+      let sunrise = "06:00 AM";
+      let sunset = "08:00 PM";
+      if (data.forecast && Array.isArray(data.forecast.forecastday) && data.forecast.forecastday.length > 0) {
+        sunrise = data.forecast.forecastday[0].astro.sunrise || sunrise;
+        sunset = data.forecast.forecastday[0].astro.sunset || sunset;
+      }
 
       setWeatherData({
         temperature: Math.round(data.current.temp_c),
@@ -188,6 +262,10 @@ const HomePage = ({ user }: { user: any }) => {
         windSpeed: Math.round(data.current.wind_mph),
         visibility: Math.round(data.current.vis_miles),
         pressure: Math.round(data.current.pressure_mb),
+        precipitation: data.current.precip_mm || 0,
+        feelsLike: Math.round(data.current.feelslike_c),
+        sunrise: sunrise,
+        sunset: sunset,
         description: data.current.condition.text,
         timezone: data.location.tz_id,
       });
@@ -236,6 +314,12 @@ const HomePage = ({ user }: { user: any }) => {
       }
     } catch (err) {
       console.error("Error fetching weather:", err);
+      new Toast({
+        toastMsg: "An error occurred while fetching weather. Please try again.",
+        autoCloseTime: 4000,
+        theme: "dark",
+        type: "error",
+      });
     }
   };
 
@@ -369,6 +453,7 @@ const HomePage = ({ user }: { user: any }) => {
           <ForecastCard
             weather={weather}
             temperature={weatherData.temperature}
+            feelsLike={weatherData.feelsLike}
             location={weatherData.location}
             description={weatherData.description}
             timezone={weatherData.timezone}
@@ -389,6 +474,9 @@ const HomePage = ({ user }: { user: any }) => {
             windSpeed={weatherData.windSpeed}
             visibility={weatherData.visibility}
             pressure={weatherData.pressure}
+            precipitation={weatherData.precipitation}
+            sunrise={weatherData.sunrise}
+            sunset={weatherData.sunset}
             isNight={isNight}
           />
         </div>
