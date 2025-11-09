@@ -1,12 +1,15 @@
 import React from 'react';
 import { Card, CardContent } from "../../../components/ui/card";
-import { Wind, Droplets, Eye, Gauge } from 'lucide-react';
+import { Wind, Droplets, Eye, Gauge, CloudRain, Sunrise, Sunset } from 'lucide-react';
 
 interface WeatherDetailsCardProps {
   humidity: number;
   windSpeed: number;
   visibility: number;
   pressure: number;
+  precipitation: number;
+  sunrise: string;
+  sunset: string;
   isNight?: boolean;
 }
 
@@ -15,6 +18,9 @@ export function WeatherDetailsCard({
   windSpeed, 
   visibility, 
   pressure,
+  precipitation,
+  sunrise,
+  sunset,
   isNight = false
 }: WeatherDetailsCardProps) {
   return (
@@ -52,6 +58,30 @@ export function WeatherDetailsCard({
               <span className="text-white/70 text-sm">Pressure</span>
             </div>
             <span className="text-white font-medium">{pressure} hPa</span>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <CloudRain className="w-4 h-4 text-cyan-300" />
+              <span className="text-white/70 text-sm">Precipitation</span>
+            </div>
+            <span className="text-white font-medium">{precipitation.toFixed(1)} mm</span>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Sunrise className="w-4 h-4 text-yellow-300" />
+              <span className="text-white/70 text-sm">Sunrise</span>
+            </div>
+            <span className="text-white font-medium">{sunrise}</span>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Sunset className="w-4 h-4 text-orange-300" />
+              <span className="text-white/70 text-sm">Sunset</span>
+            </div>
+            <span className="text-white font-medium">{sunset}</span>
           </div>
         </div>
       </CardContent>
