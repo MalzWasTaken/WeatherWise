@@ -445,7 +445,7 @@ const HomePage = ({ user }: { user: any }) => {
 
       <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8 mb-8 z-[2] px-4">
         <div className="col-span-1 lg:col-span-3 w-full">
-          <UserCard user={user} alerts={userAlerts} forecast={forecastData} />
+          <UserCard user={user} forecast={forecastData} />
         </div>
 
         {/* ForecastCard left */}

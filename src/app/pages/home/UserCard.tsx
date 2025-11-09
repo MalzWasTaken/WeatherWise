@@ -19,14 +19,12 @@ export interface ForecastData {
 
 interface UserCardProps {
   user: any;
-  alerts: { title: string; description?: string; date?: string }[];
   forecast?: ForecastData[];
   isNight?: boolean;
 }
 
 export const UserCard: React.FC<UserCardProps> = ({
   user,
-  alerts,
   forecast = [],
   isNight = false,
 }) => {
@@ -56,8 +54,6 @@ export const UserCard: React.FC<UserCardProps> = ({
   return (
     <Card className="bg-white/20 backdrop-blur-md border-white/30 hover:scale-105 transition-all duration-300">
       <CardContent className="p-6 flex flex-col gap-6">
-        {/* Top section: User + Alerts */}
-        <div className="flex items-start justify-between w-full gap-6">
           {/* User Info */}
           <div className="flex items-center gap-4">
             <img
@@ -71,30 +67,8 @@ export const UserCard: React.FC<UserCardProps> = ({
               </p>
               <p className="text-sm text-gray-200">{user.email}</p>
             </div>
-          </div>
-
-          {/* Alerts */}
-          {alerts.length > 0 ? (
-            <div className="flex flex-col gap-2">
-              <h1 className="text-sm text-gray-100 font-bold">Your Alerts:</h1>
-              <div className="flex flex-col gap-2">
-                {alerts.map((alert, idx) => (
-                  <div key={idx} className="flex flex-col gap-1">
-                    <span className="font-semibold text-white">
-                      {alert.title}
-                    </span>
-                    {alert.description && (
-                      <span className="text-gray-200 text-xs">
-                        {alert.description}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-gray-200">No alerts</p>
-          )}
+        </div>
+        <div>
         </div>
 
         {/* 7-Day Forecast Section */}
