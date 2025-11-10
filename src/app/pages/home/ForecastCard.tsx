@@ -34,9 +34,10 @@ interface ForecastCardProps {
     description?: string;
     timezone?: string;
     isNight?: boolean;
+    forecastDate?: string | null;
 }
 
-export function ForecastCard({weather, temperature = 22, feelsLike, location = "London", description, timezone = "Europe/London", isNight = false}: ForecastCardProps) {
+export function ForecastCard({weather, temperature = 22, feelsLike, location = "London", description, timezone = "Europe/London", isNight = false, forecastDate = null}: ForecastCardProps) {
 
     const [time,setTime] = useState('00:00');
 
@@ -73,6 +74,9 @@ export function ForecastCard({weather, temperature = 22, feelsLike, location = "
             <CardContent className="p-8 h-full flex flex-col justify-between overflow-hidden">
                 <div className="text-center flex-shrink-0">
                     <h2 className="text-2xl font-bold text-white mb-2 truncate">{location}</h2>
+                    {forecastDate && (
+                        <p className="text-white/80 text-xs mb-1 font-medium">{forecastDate}</p>
+                    )}
                     <p className="text-white/70 text-sm mb-6 line-clamp-2">{description || getWeatherDescription(weather)}</p>
                 </div>
                 

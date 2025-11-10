@@ -22,6 +22,8 @@ interface UserCardProps {
   alerts: { title: string; description?: string; date?: string }[];
   forecast?: ForecastData[];
   isNight?: boolean;
+  onDayClick?: (dayIndex: number | null) => void;
+  selectedDayIndex?: number | null;
 }
 
 export const UserCard: React.FC<UserCardProps> = ({
@@ -29,6 +31,8 @@ export const UserCard: React.FC<UserCardProps> = ({
   alerts,
   forecast = [],
   isNight = false,
+  onDayClick,
+  selectedDayIndex = null,
 }) => {
   const getWeatherIcon = (condition?: string) => {
     if (!condition) return isNight ? <NightClear /> : <Sunny />;
@@ -98,24 +102,54 @@ export const UserCard: React.FC<UserCardProps> = ({
         </div>
 
         {/* 7-Day Forecast Section */}
-        {forecast.length > 0 && (
-          <div className="grid grid-cols-7 gap-4 w-full mt-4">
-            {forecast.map((day, idx) => (
-              <div
-                key={idx}
-                className="flex flex-col items-center justify-center p-2 bg-white/10 rounded-lg"
-              >
-                <span className="text-xs text-gray-300 font-semibold">
-                  {day.day}
-                </span>
-                <div className="w-8 h-8 mb-1">
-                  {getWeatherIcon(day.condition)}
-                </div>
-                <span className="text-white text-sm">
-                  {day.maxTemp} / {day.minTemp}
-                </span>
-              </div>
-            ))}
+        {forecast && forecast.length > 0 ? (
+          <div className="w-full mt-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-white font-semibold text-sm">7-Day Forecast</h3>
+              {selectedDayIndex !== null && onDayClick && (
+                <button
+                  onClick={() => onDayClick(null)}
+                  className="text-xs text-white/80 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1 rounded-md transition-all duration-200"
+                >
+                  Show Today
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-7 gap-4 w-full">
+              {forecast.map((day, idx) => {
+                if (!day) return null;
+                const isSelected = selectedDayIndex === idx;
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => onDayClick && onDayClick(idx)}
+                    className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 ${
+                      isSelected
+                        ? "bg-white/30 ring-2 ring-white/50 scale-105"
+                        : "bg-white/10 hover:bg-white/20 hover:scale-105"
+                    } cursor-pointer`}
+                  >
+                    <span className={`text-xs font-semibold ${
+                      isSelected ? "text-white" : "text-gray-300"
+                    }`}>
+                      {day.day || '--'}
+                    </span>
+                    <div className="w-8 h-8 mb-1">
+                      {getWeatherIcon(day.condition)}
+                    </div>
+                    <span className={`text-sm ${
+                      isSelected ? "text-white font-semibold" : "text-white"
+                    }`}>
+                      {day.maxTemp || '--'} / {day.minTemp || '--'}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="w-full mt-4">
+            <p className="text-white/60 text-sm text-center">Forecast data loading...</p>
           </div>
         )}
       </CardContent>

@@ -15,7 +15,7 @@ const TopBar = ({ onCitySelect }: TopBarProps) => {
             <h1 className="lg:text-4xl font-extrabold bg-gradient-to-r from-blue-400 to-cyan-400 text-shadow-2xs bg-clip-text z-[1] text-transparent tracking-wide sm:text-2xl text-xl">
               WeatherWise{" "}
             </h1>
-            <h1 className = "lg:text-4xl">⛅</h1>
+            <h1 className = "lg:text-4xl"></h1>
           </div>
           <div className="flex-1 sm:flex justify-center hidden ">
             <SearchBarWithSuggestions onCitySelect={onCitySelect} />

@@ -133,6 +133,9 @@ const HomePage = ({ user }: { user: any }) => {
   const [userAlerts, setUserAlerts] = useState<any[]>([]);
   const [weatherAlerts, setWeatherAlerts] = useState<any[]>([]);
   const [forecastData, setForecastData] = useState<any[]>([]);
+  const [fullForecastData, setFullForecastData] = useState<any[]>([]);
+  const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
+  const [currentWeatherData, setCurrentWeatherData] = useState<any>(null);
   const [weatherData, setWeatherData] = useState({
     temperature: 0,
     location: "",
@@ -146,6 +149,7 @@ const HomePage = ({ user }: { user: any }) => {
     sunset: "08:00 PM",
     description: "",
     timezone: "Europe/London",
+    forecastDate: null as string | null,
   });
   const [isNight, setIsNight] = useState(false);
   const [isLoadingWeather, setIsLoadingWeather] = useState(true);
@@ -238,6 +242,23 @@ const HomePage = ({ user }: { user: any }) => {
       // Validate that required data structure exists
       if (!data.current || !data.location) {
         console.error("Invalid weather data structure:", data);
+        // Still try to set forecast if it exists
+        if (data.forecast && Array.isArray(data.forecast.forecastday) && data.forecast.forecastday.length > 0) {
+          console.log("Setting forecast data despite invalid current data");
+          const mappedForecast: any[] = data.forecast.forecastday.map(
+            (day: any) => ({
+              day: new Date(day.date).toLocaleDateString("en-US", {
+                weekday: "short",
+              }),
+              condition: day.day?.condition?.text || "Unknown",
+              maxTemp: Math.round(day.day?.maxtemp_c || 0) + "°C",
+              minTemp: Math.round(day.day?.mintemp_c || 0) + "°C",
+            })
+          ).filter((day: any) => day !== null);
+          if (mappedForecast.length > 0) {
+            setForecastData(mappedForecast);
+          }
+        }
         new Toast({
           toastMsg: "Invalid weather data received. Please try again.",
           autoCloseTime: 4000,
@@ -245,6 +266,12 @@ const HomePage = ({ user }: { user: any }) => {
           type: "error",
         });
         return;
+      }
+      
+      // Log forecast data availability
+      console.log("Forecast data available:", data.forecast ? "Yes" : "No");
+      if (data.forecast) {
+        console.log("Forecast days:", data.forecast.forecastday?.length || 0);
       }
 
       // Extract sunrise and sunset from forecast data
@@ -254,6 +281,15 @@ const HomePage = ({ user }: { user: any }) => {
         sunrise = data.forecast.forecastday[0].astro.sunrise || sunrise;
         sunset = data.forecast.forecastday[0].astro.sunset || sunset;
       }
+
+      // Store current weather data and full forecast data
+      setCurrentWeatherData(data);
+      if (data.forecast && Array.isArray(data.forecast.forecastday)) {
+        setFullForecastData(data.forecast.forecastday);
+      }
+
+      // Reset selected day when new weather is fetched
+      setSelectedDayIndex(null);
 
       setWeatherData({
         temperature: Math.round(data.current.temp_c),
@@ -268,6 +304,7 @@ const HomePage = ({ user }: { user: any }) => {
         sunset: sunset,
         description: data.current.condition.text,
         timezone: data.location.tz_id,
+        forecastDate: null,
       });
 
       const condition = data.current.condition.text.toLowerCase();
@@ -299,27 +336,172 @@ const HomePage = ({ user }: { user: any }) => {
       else setWeather("clear");
 
       // Map forecast for UserCard
-      if (data.forecast && Array.isArray(data.forecast.forecastday)) {
-        const mappedForecast: any[] = data.forecast.forecastday.map(
-          (day: any) => ({
-            day: new Date(day.date).toLocaleDateString("en-US", {
-              weekday: "short",
-            }),
-            condition: day.day.condition.text,
-            maxTemp: Math.round(day.day.maxtemp_c) + "°C",
-            minTemp: Math.round(day.day.mintemp_c) + "°C",
-          })
-        );
-        setForecastData(mappedForecast);
+      if (data.forecast && Array.isArray(data.forecast.forecastday) && data.forecast.forecastday.length > 0) {
+        try {
+          const mappedForecast: any[] = data.forecast.forecastday.map(
+            (day: any) => {
+              if (!day || !day.day || !day.date) {
+                console.warn("Invalid forecast day data:", day);
+                return null;
+              }
+              return {
+                day: new Date(day.date).toLocaleDateString("en-US", {
+                  weekday: "short",
+                }),
+                condition: day.day.condition?.text || "Unknown",
+                maxTemp: Math.round(day.day.maxtemp_c || 0) + "°C",
+                minTemp: Math.round(day.day.mintemp_c || 0) + "°C",
+              };
+            }
+          ).filter((day: any) => day !== null); // Remove any null entries
+          
+          if (mappedForecast.length > 0) {
+            setForecastData(mappedForecast);
+            console.log("Forecast data set:", mappedForecast.length, "days");
+          } else {
+            console.warn("No valid forecast days after mapping");
+            setForecastData([]);
+          }
+        } catch (forecastError) {
+          console.error("Error mapping forecast data:", forecastError);
+          setForecastData([]);
+        }
+      } else {
+        // If no forecast data, set empty array
+        console.warn("No forecast data available in API response. Forecast object:", data.forecast);
+        setForecastData([]);
       }
     } catch (err) {
       console.error("Error fetching weather:", err);
+      setForecastData([]); // Clear forecast on error
       new Toast({
         toastMsg: "An error occurred while fetching weather. Please try again.",
         autoCloseTime: 4000,
         theme: "dark",
         type: "error",
       });
+    }
+  };
+
+  // Handle day click - update weather display to show selected day's forecast
+  const handleDayClick = (dayIndex: number | null) => {
+    if (dayIndex === null) {
+      // Reset to current weather
+      if (currentWeatherData) {
+        const data = currentWeatherData;
+        let sunrise = "06:00 AM";
+        let sunset = "08:00 PM";
+        if (data.forecast && Array.isArray(data.forecast.forecastday) && data.forecast.forecastday.length > 0) {
+          sunrise = data.forecast.forecastday[0].astro.sunrise || sunrise;
+          sunset = data.forecast.forecastday[0].astro.sunset || sunset;
+        }
+
+        setWeatherData({
+          temperature: Math.round(data.current.temp_c),
+          location: `${data.location.name}, ${data.location.country}`,
+          humidity: data.current.humidity,
+          windSpeed: Math.round(data.current.wind_mph),
+          visibility: Math.round(data.current.vis_miles),
+          pressure: Math.round(data.current.pressure_mb),
+          precipitation: data.current.precip_mm || 0,
+          feelsLike: Math.round(data.current.feelslike_c),
+          sunrise: sunrise,
+          sunset: sunset,
+          description: data.current.condition.text,
+          timezone: data.location.tz_id,
+          forecastDate: null,
+        });
+
+        const condition = data.current.condition.text.toLowerCase();
+        if (
+          condition.includes("rain") ||
+          condition.includes("drizzle") ||
+          condition.includes("shower")
+        )
+          setWeather("rain");
+        else if (condition.includes("thunder") || condition.includes("storm"))
+          setWeather("thunderstorm");
+        else if (
+          condition.includes("snow") ||
+          condition.includes("blizzard") ||
+          condition.includes("sleet")
+        )
+          setWeather("snow");
+        else if (condition.includes("clear") || condition.includes("sunny"))
+          setWeather("clear");
+        else if (condition.includes("partly")) setWeather("partly-cloudy");
+        else if (condition.includes("cloud") || condition.includes("overcast"))
+          setWeather("cloudy");
+        else if (
+          condition.includes("mist") ||
+          condition.includes("fog") ||
+          condition.includes("haze")
+        )
+          setWeather("mist");
+        else setWeather("clear");
+      }
+      setSelectedDayIndex(null);
+      return;
+    }
+
+    // Show forecast for selected day
+    if (fullForecastData && fullForecastData[dayIndex]) {
+      const day = fullForecastData[dayIndex];
+      setSelectedDayIndex(dayIndex);
+
+      // Format the date for display
+      const forecastDate = new Date(day.date).toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+
+      // Update weather data with forecast day data
+      setWeatherData({
+        temperature: Math.round(day.day.maxtemp_c), // Show max temp for forecast days
+        location: weatherData.location, // Keep current location
+        humidity: day.day.avghumidity,
+        windSpeed: Math.round(day.day.maxwind_mph),
+        visibility: Math.round(day.day.avgvis_miles || weatherData.visibility), // Use forecast visibility if available
+        pressure: weatherData.pressure, // Forecast doesn't have pressure per day, keep current
+        precipitation: day.day.totalprecip_mm || 0,
+        feelsLike: Math.round(day.day.avgtemp_c), // Use avg temp as feels like for forecast
+        sunrise: day.astro.sunrise,
+        sunset: day.astro.sunset,
+        description: day.day.condition.text,
+        timezone: weatherData.timezone, // Keep current timezone
+        forecastDate: forecastDate,
+      });
+
+      // Update weather condition
+      const condition = day.day.condition.text.toLowerCase();
+      if (
+        condition.includes("rain") ||
+        condition.includes("drizzle") ||
+        condition.includes("shower")
+      )
+        setWeather("rain");
+      else if (condition.includes("thunder") || condition.includes("storm"))
+        setWeather("thunderstorm");
+      else if (
+        condition.includes("snow") ||
+        condition.includes("blizzard") ||
+        condition.includes("sleet")
+      )
+        setWeather("snow");
+      else if (condition.includes("clear") || condition.includes("sunny"))
+        setWeather("clear");
+      else if (condition.includes("partly")) setWeather("partly-cloudy");
+      else if (condition.includes("cloud") || condition.includes("overcast"))
+        setWeather("cloudy");
+      else if (
+        condition.includes("mist") ||
+        condition.includes("fog") ||
+        condition.includes("haze")
+      )
+        setWeather("mist");
+      else setWeather("clear");
     }
   };
 
@@ -445,7 +627,14 @@ const HomePage = ({ user }: { user: any }) => {
 
       <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8 mb-8 z-[2] px-4">
         <div className="col-span-1 lg:col-span-3 w-full">
-          <UserCard user={user} alerts={userAlerts} forecast={forecastData} />
+          <UserCard 
+            user={user} 
+            alerts={userAlerts} 
+            forecast={forecastData}
+            onDayClick={handleDayClick}
+            selectedDayIndex={selectedDayIndex}
+            isNight={isNight}
+          />
         </div>
 
         {/* ForecastCard left */}
@@ -458,6 +647,7 @@ const HomePage = ({ user }: { user: any }) => {
             description={weatherData.description}
             timezone={weatherData.timezone}
             isNight={isNight}
+            forecastDate={weatherData.forecastDate}
           />
         </div>
 

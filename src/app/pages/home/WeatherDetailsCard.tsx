@@ -83,6 +83,7 @@ export function WeatherDetailsCard({
             </div>
             <span className="text-white font-medium">{sunset}</span>
           </div>
+          
         </div>
       </CardContent>
     </Card>
