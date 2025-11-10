@@ -31,6 +31,7 @@ export default function WeatherAlertForm() {
         const alertDetails = alerts.map((alert: any) => ({
           id: alert.id,
           city: alert.city,
+          weather_type: alert.weather_type,
         }));
         setUserAlerts(alertDetails);
       } else {
@@ -184,7 +185,7 @@ export default function WeatherAlertForm() {
     }
   };
 
-  // Fetch user on mount
+  // Fetch user
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -244,7 +245,7 @@ export default function WeatherAlertForm() {
             setCity(e.target.value);
             setCheckedCity(false);
           }}
-          onBlur={() => validateCity(city)} // validate on blur
+          onBlur={() => validateCity(city)} 
           className="w-full p-2 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
 

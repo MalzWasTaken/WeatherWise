@@ -629,7 +629,6 @@ const HomePage = ({ user }: { user: any }) => {
         <div className="col-span-1 lg:col-span-3 w-full">
           <UserCard 
             user={user} 
-            alerts={userAlerts} 
             forecast={forecastData}
             onDayClick={handleDayClick}
             selectedDayIndex={selectedDayIndex}
